@@ -1,15 +1,13 @@
 package cmd
 
 import (
-	"google.golang.org/api/option"
-	"context"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
+
 	"github.com/spf13/cobra"
-	"cloud.google.com/go/storage"
-	"github.com/urvil38/kubepaas/utils"
+	"github.com/urvil38/kubepaas/util"
+	"github.com/urvil38/kubepaas/storageutil"
 )
 
 // deployCmd represents the deploy command
@@ -23,9 +21,9 @@ It require app.yaml file to be in your current directory where you running kubep
 		if !exists {
 			return
 		}
-		tarFilePath,err := generateTarFolder()
+		tarFilePath, err := generateTarFolder()
 		if err != nil {
-			fmt.Printf("Unable to create zip folder :%v",err.Error())
+			fmt.Printf("Unable to create zip folder :%v", err.Error())
 		}
 		err = uploadFile(tarFilePath)
 		if err != nil {
@@ -36,41 +34,12 @@ It require app.yaml file to be in your current directory where you running kubep
 
 func uploadFile(source string) error {
 	bucketName := "staging-kubepaas-ml"
-	
-	ctx := context.Background()
-	httpClient := utils.CreateStorageClient()
-	client,err := storage.NewClient(ctx,option.WithHTTPClient(httpClient))
-	if err != nil {
-		return err
-	}
-
-	writer := client.Bucket(bucketName).Object(filepath.Base(source)).NewWriter(ctx)
-	
-	reader,err := os.Open(source)
-	if err != nil {
-		return err
-	}
-	defer reader.Close()
-	if err != nil {
-		return err
-	}
-	b,err := io.Copy(writer,reader)
-	if err != nil {
-		return err
-	}
-	fmt.Print("Bytes writtern:",b)
-	err = writer.Close()
-	if err != nil {
-		fmt.Printf("Successfully uploaded file at path:%v",source)
-		err := os.Remove(source)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	destination := filepath.Base(source)
+	uploadObject := storageutil.NewUploadObject(source,destination,bucketName)
+	return uploadObject.Upload()
 }
 
-func checkConfigFileExists() bool{
+func checkConfigFileExists() bool {
 	wd, err := os.Getwd()
 	if err != nil {
 		fmt.Printf("Couldn't Find current working directory beacause of : %v\n", err)
@@ -85,18 +54,18 @@ func checkConfigFileExists() bool{
 	return true
 }
 
-func generateTarFolder() (path string,err error) {
+func generateTarFolder() (path string, err error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		fmt.Printf("Couldn't Find current working directory becauser of %v\n", err)
 	}
 	temp := os.TempDir()
-	temptar := filepath.Join(temp,filepath.Base(wd))
-	targetPath,err := utils.Tarit(wd,temptar)
+	temptar := filepath.Join(temp, filepath.Base(wd))
+	targetPath, err := util.Tarit(wd, temptar)
 	if err != nil {
-		return "",err
+		return "", err
 	}
-	return targetPath,nil
+	return targetPath, nil
 }
 
 func init() {
