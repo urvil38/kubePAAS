@@ -2,20 +2,20 @@ package util
 
 import (
 	"archive/zip"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
-	"io"
 )
 
 //Zipit zip the folder given by source path and place it at target path
-func Zipit(source, target string) (path string ,err error) {
+func Zipit(source, target string) (path string, err error) {
 	if filepath.Ext(target) != "zip" || filepath.Ext(target) == "" {
 		target = target + ".zip"
 	}
 	zipfile, err := os.Create(target)
 	if err != nil {
-		return "",err
+		return "", err
 	}
 	defer zipfile.Close()
 
@@ -35,8 +35,7 @@ func Zipit(source, target string) (path string ,err error) {
 			return err
 		}
 
-		
-		header.Name = strings.TrimPrefix(strings.Replace(file,source,"",-1),string(filepath.Separator))
+		header.Name = strings.TrimPrefix(strings.Replace(file, source, "", -1), string(filepath.Separator))
 
 		if info.IsDir() {
 			header.Name += "/"
@@ -62,5 +61,5 @@ func Zipit(source, target string) (path string ,err error) {
 		return err
 	})
 
-	return target,nil
+	return target, nil
 }

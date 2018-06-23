@@ -17,10 +17,6 @@ var deployCmd = &cobra.Command{
 	Long: `Using deploy commnad you can deploy your code to kubepaas platform.
 It require app.yaml file to be in your current directory where you running kubepaas deploy command.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		exists := checkConfigFileExists()
-		if !exists {
-			return
-		}
 		tarFilePath, err := generateTarFolder()
 		if err != nil {
 			fmt.Printf("Unable to create zip folder :%v", err.Error())
@@ -34,24 +30,8 @@ It require app.yaml file to be in your current directory where you running kubep
 
 func uploadFile(source string) error {
 	bucketName := "staging-kubepaas-ml"
-	destination := filepath.Base(source)
-	uploadObject := storageutil.NewUploadObject(source,destination,bucketName)
+	uploadObject := storageutil.CreateUploadObject(source,filepath.Base(source),bucketName)
 	return uploadObject.Upload()
-}
-
-func checkConfigFileExists() bool {
-	wd, err := os.Getwd()
-	if err != nil {
-		fmt.Printf("Couldn't Find current working directory beacause of : %v\n", err)
-	}
-
-	if _, err := os.Stat(filepath.Join(wd, "app.yaml")); err != nil {
-		if _, err := os.Stat(filepath.Join(wd, "app.yml")); err != nil {
-			fmt.Printf("No app.yaml file exist. Make sure you have app.yaml file in current project\n")
-			return false
-		}
-	}
-	return true
 }
 
 func generateTarFolder() (path string, err error) {

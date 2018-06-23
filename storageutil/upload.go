@@ -1,24 +1,26 @@
 package storageutil
 
 import (
+	"context"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
-	"context"
-	"fmt"
+
+	"github.com/urvil38/kubepaas/util"
 )
 
-type uploadObject struct{
-	source string
+type uploadObject struct {
+	source      string
 	destination string
-	bucketName string
+	bucketName  string
 }
 
-func NewUploadObject(sourcePath,destinationPath,bucketName string) *uploadObject {
+func CreateUploadObject(sourcePath, destinationPath, bucketName string) *uploadObject {
 	return &uploadObject{
-		source:sourcePath,
+		source:      sourcePath,
 		destination: destinationPath,
-		bucketName: bucketName,
+		bucketName:  bucketName,
 	}
 }
 
@@ -38,18 +40,28 @@ func (u *uploadObject) Upload() error {
 	if err != nil {
 		return err
 	}
-	b, err := io.Copy(writer, reader)
+
+	fi, err := reader.Stat()
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Bytes writtern: %.2f KB\n", float64(b)/1024)
+	b := fi.Size()
+
+	s := util.NewSpinner(fmt.Sprintf("Uploding: %.2f KB of tar file ", float64(b)/1024))
+	s.Start()
+
+	_, err = io.Copy(writer, reader)
+	if err != nil {
+		s.Stop()
+		return err
+	}
+
 	err = writer.Close()
 	if err != nil {
-		if err != nil {
-			return err
-		}
+		return err
 	}
-	fmt.Printf("Successfully uploaded file at path: %v\n", u.source)
+	s.Stop()
+	fmt.Printf("\nSuccessfully uploaded file : %v\n", u.source)
 	err = os.Remove(u.source)
 	if err != nil {
 		return err
