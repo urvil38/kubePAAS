@@ -1,11 +1,25 @@
 package cmd
 
 import (
-	"path/filepath"
 	"fmt"
+	"math/rand"
 	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/spf13/cobra"
+)
+
+const (
+	banner = `
+
+	██╗  ██╗██╗   ██╗██████╗ ███████╗██████╗  █████╗  █████╗ ███████╗
+	██║ ██╔╝██║   ██║██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔════╝
+	█████╔╝ ██║   ██║██████╔╝█████╗  ██████╔╝███████║███████║███████╗
+	██╔═██╗ ██║   ██║██╔══██╗██╔══╝  ██╔═══╝ ██╔══██║██╔══██║╚════██║
+	██║  ██╗╚██████╔╝██████╔╝███████╗██║     ██║  ██║██║  ██║███████║
+	╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
+																	 `
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -20,12 +34,8 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	Run: func(cmd *cobra.Command, args []string) { 
-		exists := checkConfigFileExists()
-		if !exists {
-			return
-		}
-	},
+	// Run: func(cmd *cobra.Command, args []string) {
+	// },
 }
 
 func checkConfigFileExists() bool {
@@ -40,6 +50,7 @@ func checkConfigFileExists() bool {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -52,7 +63,17 @@ func Execute() {
 	}
 }
 
-// func init() {
+func init() {
+
+	rand.Seed(time.Now().UnixNano())
+	colorCounter := rand.Intn(7)
+	fmt.Printf("\x1b[3%dm%v\x1b[0m", colorCounter+1, banner)
+
+	exists := checkConfigFileExists()
+	if !exists {
+		return
+	}
+
 	// cobra.OnInitialize(initConfig)
 
 	// Here you will define your flags and configuration settings.
@@ -63,4 +84,4 @@ func Execute() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-// }
+}

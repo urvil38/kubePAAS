@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"strings"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -30,7 +31,9 @@ It require app.yaml file to be in your current directory where you running kubep
 
 func uploadFile(source string) error {
 	bucketName := "staging-kubepaas-ml"
-	uploadObject := storageutil.CreateUploadObject(source,filepath.Base(source),bucketName)
+	fileName := filepath.Base(source)
+	folderName := strings.Split(fileName,".")[0]
+	uploadObject := storageutil.CreateUploadObject(source,folderName+"/"+fileName,bucketName)
 	return uploadObject.Upload()
 }
 

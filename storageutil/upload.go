@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 
-	"github.com/urvil38/kubepaas/util"
+	"github.com/urvil38/spinner"
 )
 
 type uploadObject struct {
@@ -30,7 +29,7 @@ func (u *uploadObject) Upload() error {
 		return err
 	}
 
-	writer := client.Bucket(u.bucketName).Object(filepath.Base(u.destination)).NewWriter(context.Background())
+	writer := client.Bucket(u.bucketName).Object(u.destination).NewWriter(context.Background())
 
 	reader, err := os.Open(u.source)
 	if err != nil {
@@ -47,21 +46,19 @@ func (u *uploadObject) Upload() error {
 	}
 	b := fi.Size()
 
-	s := util.NewSpinner(fmt.Sprintf("Uploding: %.2f KB of tar file ", float64(b)/1024))
+	s := spinner.NewSpinner(fmt.Sprintf("Uploding: %.2f KB of tar file ", float64(b)/1024))
 	s.Start()
-
 	_, err = io.Copy(writer, reader)
 	if err != nil {
 		s.Stop()
 		return err
 	}
-
 	err = writer.Close()
 	if err != nil {
 		return err
 	}
 	s.Stop()
-	fmt.Printf("\nSuccessfully uploaded file : %v\n", u.source)
+	fmt.Printf("Successfully uploaded file : %v\n", u.source)
 	err = os.Remove(u.source)
 	if err != nil {
 		return err
