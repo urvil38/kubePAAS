@@ -20,12 +20,12 @@ func Tarit(source, target string) (path string, err error) {
 	if filepath.Ext(target) != "tgz" || filepath.Ext(target) == "" {
 		target = target + ".tgz"
 	}
-	writer, err := os.Create(target)
+	fromFile, err := os.Create(target)
 	if err != nil {
 		return "", fmt.Errorf("Unable to tar file - %v", err.Error())
 	}
 
-	gzw := gzip.NewWriter(writer)
+	gzw := gzip.NewWriter(fromFile)
 	defer gzw.Close()
 
 	tw := tar.NewWriter(gzw)
@@ -46,6 +46,10 @@ func Tarit(source, target string) (path string, err error) {
 		}
 
 		header.Name = strings.TrimPrefix(strings.Replace(file, source, "", -1), string(filepath.Separator))
+
+		if fi.IsDir() {
+			header.Name += "/"
+		}
 
 		if err := tw.WriteHeader(header); err != nil {
 			return err
