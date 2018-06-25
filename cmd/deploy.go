@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"strings"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/satori/go.uuid"
 	"github.com/urvil38/kubepaas/util"
 	"github.com/urvil38/kubepaas/storageutil"
 )
@@ -20,19 +20,23 @@ It require app.yaml file to be in your current directory where you running kubep
 	Run: func(cmd *cobra.Command, args []string) {
 		tarFilePath, err := generateTarFolder()
 		if err != nil {
-			fmt.Printf("Unable to create zip folder :%v", err.Error())
+			fmt.Printf("Unable to create tar folder :%v", err.Error())
 		}
 		err = uploadFile(tarFilePath)
 		if err != nil {
-			fmt.Printf("Error while Uploding File:%v", err.Error())
+			fmt.Printf("Error while Uploding File :%v\n", err.Error())
 		}
 	},
 }
 
 func uploadFile(source string) error {
+	wd,err := os.Getwd()
+	if err != nil {
+		return err
+	}
 	bucketName := "staging-kubepaas-ml"
 	fileName := filepath.Base(source)
-	folderName := strings.Split(fileName,".")[0]
+	folderName := filepath.Base(wd)
 	uploadObject := storageutil.CreateUploadObject(source,folderName+"/"+fileName,bucketName)
 	return uploadObject.Upload()
 }
@@ -44,6 +48,11 @@ func generateTarFolder() (path string, err error) {
 	}
 	temp := os.TempDir()
 	temptar := filepath.Join(temp, filepath.Base(wd))
+	id,err := uuid.NewV4()
+	if err != nil {
+		return "",err
+	}
+	temptar = temptar + "-" + id.String()
 	targetPath, err := util.Tarit(wd, temptar)
 	if err != nil {
 		return "", err

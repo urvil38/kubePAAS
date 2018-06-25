@@ -55,9 +55,9 @@ func (u *uploadObject) Upload() error {
 	}
 	err = writer.Close()
 	if err != nil {
-		return err
+		s.Stop()
+		return fmt.Errorf(" \x1b[31mPlease check your internet connection ℹ\x1b[0m")
 	}
-	s.Stop()
 	fmt.Printf("Successfully uploaded file : %v\n", u.source)
 	err = os.Remove(u.source)
 	if err != nil {

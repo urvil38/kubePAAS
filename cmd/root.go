@@ -19,19 +19,16 @@ const (
 	██╔═██╗ ██║   ██║██╔══██╗██╔══╝  ██╔═══╝ ██╔══██║██╔══██║╚════██║
 	██║  ██╗╚██████╔╝██████╔╝███████╗██║     ██║  ██║██║  ██║███████║
 	╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
-																	 `
+
+`
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "kubepaas",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "A CLI for interacting with kubepaas platform",
+	Long: `A tool for interacting with kubepaas platform 
+and used for all kind of command that This plateform will support`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) {
@@ -45,10 +42,8 @@ func checkConfigFileExists() bool {
 	}
 
 	if _, err := os.Stat(filepath.Join(wd, "app.yaml")); err != nil {
-		if _, err := os.Stat(filepath.Join(wd, "app.yml")); err != nil {
-			fmt.Printf("No app.yaml file exist. Make sure you have app.yaml file in current project\n")
+			fmt.Println("\x1b[31m✗ No app.yaml file exist. Make sure you have app.yaml file in current project ℹ\x1b[0m")
 			return false
-		}
 	}
 
 	return true
@@ -71,7 +66,7 @@ func init() {
 
 	exists := checkConfigFileExists()
 	if !exists {
-		return
+		os.Exit(0)
 	}
 
 	// cobra.OnInitialize(initConfig)
