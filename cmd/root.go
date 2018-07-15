@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -35,20 +34,6 @@ and used for all kind of command that This plateform will support`,
 	// },
 }
 
-func checkConfigFileExists() bool {
-	wd, err := os.Getwd()
-	if err != nil {
-		fmt.Printf("Couldn't Find current working directory beacause of : %v\n", err)
-	}
-
-	if _, err := os.Stat(filepath.Join(wd, "app.yaml")); err != nil {
-			fmt.Println("\x1b[31m✗ No app.yaml file exist. Make sure you have app.yaml file in current project ℹ\x1b[0m")
-			return false
-	}
-
-	return true
-}
-
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
@@ -63,11 +48,6 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 	colorCounter := rand.Intn(7)
 	fmt.Printf("\x1b[3%dm%v\x1b[0m", colorCounter+1, banner)
-
-	exists := checkConfigFileExists()
-	if !exists {
-		os.Exit(0)
-	}
 
 	// cobra.OnInitialize(initConfig)
 

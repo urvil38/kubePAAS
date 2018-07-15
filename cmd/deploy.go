@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/spf13/cobra"
 	"github.com/satori/go.uuid"
-	"github.com/urvil38/kubepaas/util"
+	"github.com/spf13/cobra"
 	"github.com/urvil38/kubepaas/storageutil"
+	"github.com/urvil38/kubepaas/util"
 )
 
 // deployCmd represents the deploy command
@@ -18,6 +18,10 @@ var deployCmd = &cobra.Command{
 	Long: `Using deploy commnad you can deploy your code to kubepaas platform.
 It require app.yaml file to be in your current directory where you running kubepaas deploy command.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		exists := checkConfigFileExists()
+		if !exists {
+			os.Exit(0)
+		}
 		tarFilePath, err := generateTarFolder()
 		if err != nil {
 			fmt.Printf("Unable to create tar folder :%v", err.Error())
@@ -30,14 +34,14 @@ It require app.yaml file to be in your current directory where you running kubep
 }
 
 func uploadFile(source string) error {
-	wd,err := os.Getwd()
+	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 	bucketName := "staging-kubepaas-ml"
 	fileName := filepath.Base(source)
 	folderName := filepath.Base(wd)
-	uploadObject := storageutil.CreateUploadObject(source,folderName+"/"+fileName,bucketName)
+	uploadObject := storageutil.CreateUploadObject(source, folderName+"/"+fileName, bucketName)
 	return uploadObject.Upload()
 }
 
@@ -48,9 +52,9 @@ func generateTarFolder() (path string, err error) {
 	}
 	temp := os.TempDir()
 	temptar := filepath.Join(temp, filepath.Base(wd))
-	id,err := uuid.NewV4()
+	id, err := uuid.NewV4()
 	if err != nil {
-		return "",err
+		return "", err
 	}
 	temptar = temptar + "-" + id.String()
 	targetPath, err := util.Tarit(wd, temptar)
@@ -58,6 +62,20 @@ func generateTarFolder() (path string, err error) {
 		return "", err
 	}
 	return targetPath, nil
+}
+
+func checkConfigFileExists() bool {
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("Couldn't Find current working directory beacause of : %v\n", err)
+	}
+
+	if _, err := os.Stat(filepath.Join(wd, "app.yaml")); err != nil {
+		fmt.Println("\x1b[31m✗ No app.yaml file exist. Make sure you have app.yaml file in current project ℹ\x1b[0m")
+		return false
+	}
+
+	return true
 }
 
 func init() {
