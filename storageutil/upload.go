@@ -46,7 +46,7 @@ func (u *uploadObject) Upload() error {
 	}
 	b := fi.Size()
 
-	s := spinner.NewSpinner(fmt.Sprintf("Uploding: %.2f KB of tar file ", float64(b)/1024))
+	s := spinner.New(fmt.Sprintf("Uploding: %.2f KB of tar file ", float64(b)/1024))
 	s.Start()
 	_, err = io.Copy(writer, reader)
 	if err != nil {
