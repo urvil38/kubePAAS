@@ -15,7 +15,7 @@ type uploadObject struct {
 	bucketName  string
 }
 
-func CreateUploadObject(sourcePath, destinationPath, bucketName string) *uploadObject {
+func NewUploadObject(sourcePath, destinationPath, bucketName string) *uploadObject {
 	return &uploadObject{
 		source:      sourcePath,
 		destination: destinationPath,

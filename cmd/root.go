@@ -1,23 +1,24 @@
 package cmd
 
 import (
-	"fmt"
-	"math/rand"
-	"os"
 	"time"
+	"math/rand"
+	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/urvil38/kubepaas/util"
 )
 
 const (
 	banner = `
 
-	██╗  ██╗██╗   ██╗██████╗ ███████╗██████╗  █████╗  █████╗ ███████╗
-	██║ ██╔╝██║   ██║██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔════╝
-	█████╔╝ ██║   ██║██████╔╝█████╗  ██████╔╝███████║███████║███████╗
-	██╔═██╗ ██║   ██║██╔══██╗██╔══╝  ██╔═══╝ ██╔══██║██╔══██║╚════██║
-	██║  ██╗╚██████╔╝██████╔╝███████╗██║     ██║  ██║██║  ██║███████║
-	╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
+██╗  ██╗██╗   ██╗██████╗ ███████╗██████╗  █████╗  █████╗ ███████╗
+██║ ██╔╝██║   ██║██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔════╝
+█████╔╝ ██║   ██║██████╔╝█████╗  ██████╔╝███████║███████║███████╗
+██╔═██╗ ██║   ██║██╔══██╗██╔══╝  ██╔═══╝ ██╔══██║██╔══██║╚════██║
+██║  ██╗╚██████╔╝██████╔╝███████╗██║     ██║  ██║██║  ██║███████║
+╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
 
 `
 )
@@ -28,26 +29,34 @@ var rootCmd = &cobra.Command{
 	Short: "A CLI for interacting with kubepaas platform",
 	Long: `A tool for interacting with kubepaas platform 
 and used for all kind of command that This plateform will support`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) {
-	// },
+	Run: func(cmd *cobra.Command,args []string) {
+		printBanner()
+		cmd.Help()
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 }
 
-func init() {
-
+func printBanner() {
 	rand.Seed(time.Now().UnixNano())
 	colorCounter := rand.Intn(7)
 	fmt.Printf("\x1b[3%dm%v\x1b[0m", colorCounter+1, banner)
+}
+
+func init() {
+
+	err := os.MkdirAll(util.GetConfigFolderPath(),0777)
+	if err != nil {
+		fmt.Printf("Unable to create config Folder: %v",err.Error())
+		os.Exit(1)
+	}
 
 	// cobra.OnInitialize(initConfig)
 

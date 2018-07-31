@@ -22,22 +22,22 @@ func Zipit(source, target string) (path string, err error) {
 	zw := zip.NewWriter(zipfile)
 	defer zw.Close()
 
-	filepath.Walk(source, func(file string, info os.FileInfo, err error) error {
+	filepath.Walk(source, func(file string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() && info.Name()[0] == '.' || info.IsDir() && info.Name() == "node_modules" {
+		if fi.IsDir() && fi.Name()[0] == '.' || fi.IsDir() && fi.Name() == "node_modules" {
 			return filepath.SkipDir
 		}
 
-		header, err := zip.FileInfoHeader(info)
+		header, err := zip.FileInfoHeader(fi)
 		if err != nil {
 			return err
 		}
 
 		header.Name = strings.TrimPrefix(strings.Replace(file, source, "", -1), string(filepath.Separator))
 
-		if info.IsDir() {
+		if fi.IsDir() {
 			header.Name += "/"
 		} else {
 			header.Method = zip.Deflate
@@ -48,7 +48,7 @@ func Zipit(source, target string) (path string, err error) {
 			return err
 		}
 
-		if info.IsDir() {
+		if fi.IsDir() {
 			return nil
 		}
 
