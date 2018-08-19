@@ -7,11 +7,9 @@ import (
 
 	"github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
-	"github.com/urvil38/kubepaas/storageutil"
+	"github.com/urvil38/kubepaas/storage"
 	"github.com/urvil38/kubepaas/util"
 )
-
-var login bool
 
 // deployCmd represents the deploy command
 var deployCmd = &cobra.Command{
@@ -20,7 +18,7 @@ var deployCmd = &cobra.Command{
 	Long: `Using deploy commnad you can deploy your code to kubepaas platform.
 It require app.yaml file to be in your current directory where you running kubepaas deploy command.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !login {
+		if !Login {
 			fmt.Println("Login or Signup in order to deploy your app to kubepaas")
 			return
 		}
@@ -47,7 +45,7 @@ func uploadFile(source string) error {
 	bucketName := "staging-kubepaas-ml"
 	fileName := filepath.Base(source)
 	folderName := filepath.Base(wd)
-	uploadObject := storageutil.NewUploadObject(source, folderName+"/"+fileName, bucketName)
+	uploadObject := storage.NewUploadObject(source, folderName+"/"+fileName, bucketName)
 	return uploadObject.Upload()
 }
 
@@ -85,9 +83,5 @@ func checkConfigFileExists() bool {
 }
 
 func init() {
-	configFilePath := util.GetConfigFilePath()
-	if _,err := os.Stat(configFilePath) ; err == nil {
-		login = true
-	}
 	rootCmd.AddCommand(deployCmd)
 }

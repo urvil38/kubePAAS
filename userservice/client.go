@@ -1,4 +1,4 @@
-package authservice
+package userservice
 
 import (
 	"crypto/tls"
@@ -19,9 +19,9 @@ func newHTTPClient(timeout *time.Duration) *types.HttpClient {
 			Dial: (&net.Dialer{
 				Timeout: 20 * time.Second,
 			}).Dial,
-			TLSHandshakeTimeout: 7 * time.Second,
+			TLSHandshakeTimeout: 10 * time.Second,
 			MaxIdleConns:        5,
-			IdleConnTimeout:     1 * time.Second,
+			IdleConnTimeout:     20 * time.Second,
 			TLSClientConfig:     &tls.Config{InsecureSkipVerify: false},
 		}
 		return &types.HttpClient{

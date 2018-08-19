@@ -15,23 +15,9 @@
 package main
 
 import (
-	"log"
-
-	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/urvil38/kubepaas/cmd"
-	"go.opencensus.io/trace"
 )
 
 func main() {
-	sd, err := stackdriver.NewExporter(stackdriver.Options{
-		ProjectID: "kubepaas",
-	})
-	if err != nil {
-		log.Fatalf("Failed to create the Stackdriver exporter: %v", err)
-	}
-	defer sd.Flush()
-	trace.RegisterExporter(sd)
-	trace.ApplyConfig(trace.Config{DefaultSampler: trace.ProbabilitySampler(1.0)})
-	
 	cmd.Execute()
 }

@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/urvil38/kubepaas/authservice"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/urvil38/kubepaas/questions"
 	"github.com/urvil38/kubepaas/types"
+	"github.com/urvil38/kubepaas/userservice"
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
@@ -15,11 +15,11 @@ import (
 var signupCmd = &cobra.Command{
 	Use:   "signup",
 	Short: "Sign up for kubepaas platform",
-	Long: ``,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := prompForRegisterUser()
 		if err != nil {
-			fmt.Print(err)
+			fmt.Println(err)
 			os.Exit(0)
 		}
 	},
@@ -27,10 +27,10 @@ var signupCmd = &cobra.Command{
 
 func prompForRegisterUser() error {
 	var user types.UserInfo
-	if err := survey.Ask(questions.RegisterUserQuestion, &user); err != nil {
+	if err := survey.Ask(questions.RegisterUser, &user); err != nil {
 		return err
 	}
-	err := authservice.RegisterUser(user)
+	err := userservice.RegisterUser(user)
 	if err != nil {
 		return err
 	}
@@ -39,14 +39,4 @@ func prompForRegisterUser() error {
 
 func init() {
 	rootCmd.AddCommand(signupCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// signupCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// signupCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

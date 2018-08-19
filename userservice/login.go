@@ -1,11 +1,8 @@
-package authservice
+package userservice
 
 import (
-	"go.opencensus.io/trace"
-	"context"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -16,31 +13,30 @@ import (
 	"github.com/urvil38/spinner"
 )
 
-func Login(ctx context.Context,auth types.AuthCredential) error {
-	ctx,span := trace.StartSpan(ctx,"login")
-	defer span.End()
+func Login(auth types.AuthCredential) error {
+	timeout := 15 * time.Second
+	c := newHTTPClient(&timeout)
 
 	b, err := json.Marshal(auth)
 	if err != nil {
 		return fmt.Errorf("Unable to marshal struct :%v", err.Error())
 	}
 
-	timeout := 20 * time.Second
-	c := newHTTPClient(&timeout)
 	s := spinner.New("Loging you in")
 	s.Start()
 	res, err := c.Client.Post(fmt.Sprintf(userserviceAPI, "login"), "application/json", bytes.NewReader(b))
 	if err != nil {
 		s.Stop()
-		return errors.New("Unable to logged in you.Please check your internet connection")
-	}
-	if res.Body != nil {
-		defer res.Body.Close()
+		return fmt.Errorf("Unable to Login.Connection Timeout ⏱")
 	}
 
 	if res.TLS == nil {
 		s.Stop()
 		fmt.Println("WARNING! Communication is not secure, please consider using HTTPS. Letsencrypt.org offers free SSL/TLS certificates.")
+	}
+
+	if res.Body != nil {
+		defer res.Body.Close()
 	}
 
 	switch res.StatusCode {
@@ -55,14 +51,15 @@ func Login(ctx context.Context,auth types.AuthCredential) error {
 		if err != nil {
 			return fmt.Errorf("Cound't get user configuration details: %v", err.Error())
 		}
-		var c config.Config
-		c.Token,c.Email = token, auth.Email
-		err = getProfile(ctx,&c)
+		var conf config.Config
+		conf.Token, conf.Email = token, auth.Email
+		userConf, err := GetUserProfile(conf)
 		if err != nil {
 			s.Stop()
 			return fmt.Errorf("Cound't get profile of user: %v", err.Error())
 		}
-		err = config.CreateConfigFile(ctx,&c)
+		conf.ID,conf.Name = userConf.ID,userConf.Name
+		err = config.CreateConfigFile(conf)
 		if err != nil {
 			s.Stop()
 			return fmt.Errorf("Cound't write user configuration details: %v", err.Error())
@@ -70,7 +67,7 @@ func Login(ctx context.Context,auth types.AuthCredential) error {
 		s.Stop()
 		fmt.Println("Successfully logged you in!!")
 	default:
-		fmt.Println("Something unexpected happend!!")
+		fmt.Println("Server Error!!")
 	}
 
 	return nil

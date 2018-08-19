@@ -1,9 +1,8 @@
-package authservice
+package userservice
 
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -27,8 +26,9 @@ func RegisterUser(user types.UserInfo) error {
 	res, err := c.Client.Post(fmt.Sprintf(userserviceAPI, "user"), "application/json", bytes.NewReader(b))
 	if err != nil {
 		s.Stop()
-		return errors.New("Unable to register you.Check your internet connection")
+		return fmt.Errorf("Unable to Register.Check Internet Connection")
 	}
+
 	if res.Body != nil {
 		res.Body.Close()
 	}
@@ -40,7 +40,7 @@ func RegisterUser(user types.UserInfo) error {
 	case http.StatusConflict:
 		fmt.Println("User is already exists!")
 	default:
-		fmt.Println("Something wronge is happaned")
+		fmt.Println("Server Error!!")
 	}
 	return nil
 }

@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"os"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/urvil38/kubepaas/util"
@@ -21,12 +21,15 @@ var logoutCmd = &cobra.Command{
 }
 
 func logOut() error {
-	configFilePath := util.GetConfigFilePath()
-	if _,err := os.Stat(configFilePath) ; err != nil {
+	configFilePath,err := util.GetConfigFilePath()
+	if err != nil {
+		return err
+	}
+	if _, err := os.Stat(configFilePath); err != nil {
 		return fmt.Errorf("You are not logged in")
 	}
 
-	err := os.Remove(configFilePath)
+	err = os.Remove(configFilePath)
 	if err != nil {
 		return fmt.Errorf("Unable to logged you out")
 	}
@@ -36,14 +39,4 @@ func logOut() error {
 
 func init() {
 	rootCmd.AddCommand(logoutCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// logoutCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// logoutCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

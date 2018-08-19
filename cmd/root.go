@@ -1,10 +1,13 @@
 package cmd
 
 import (
-	"time"
-	"math/rand"
 	"fmt"
+	"github.com/urvil38/kubepaas/config"
+	"io/ioutil"
+	"math/rand"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/urvil38/kubepaas/util"
@@ -23,13 +26,16 @@ const (
 `
 )
 
+var ConfigValue config.Config
+var Login bool
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "kubepaas",
 	Short: "A CLI for interacting with kubepaas platform",
 	Long: `A tool for interacting with kubepaas platform 
 and used for all kind of command that This plateform will support`,
-	Run: func(cmd *cobra.Command,args []string) {
+	Run: func(cmd *cobra.Command, args []string) {
 		printBanner()
 		cmd.Help()
 	},
@@ -52,20 +58,30 @@ func printBanner() {
 
 func init() {
 
-	err := os.MkdirAll(util.GetConfigFolderPath(),0777)
+	err := os.MkdirAll(util.GetConfigFolderPath(), 0777)
 	if err != nil {
-		fmt.Printf("Unable to create config Folder: %v",err.Error())
+		fmt.Printf("Unable to create config Folder: %v", err.Error())
 		os.Exit(1)
 	}
 
-	// cobra.OnInitialize(initConfig)
+	configFilePath,_ := util.GetConfigFilePath()
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kubepaas.yaml)")
+	if _, err := os.Stat(configFilePath); err == nil {
+		Login = true
+	}
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	if util.ConfigFileExists() {
+		confFileName,_ := util.GetConfigFilePath()
+	
+		b, err := ioutil.ReadFile(confFileName)
+		if err != nil {
+			return
+		}
+		str := strings.Split(string(b), "\n")
+
+		ConfigValue.AuthToken.Token = str[0]
+		ConfigValue.UserConfig.Email = str[1]
+		ConfigValue.UserConfig.ID = str[2]
+		ConfigValue.UserConfig.Name = str[3]
+	}
 }

@@ -1,78 +1,85 @@
 package cmd
 
 import (
-	"context"
-	"go.opencensus.io/trace"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/urvil38/kubepaas/authservice"
 	"github.com/urvil38/kubepaas/questions"
 	"github.com/urvil38/kubepaas/types"
-	"gopkg.in/AlecAivazis/survey.v1"
+	"github.com/urvil38/kubepaas/userservice"
 	"github.com/urvil38/kubepaas/util"
+	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Log in to kubepaas platform",
-	Long: ``,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		//checking if user is alreay logged in
 		if util.ConfigFileExists() {
 			fmt.Println("You are already loggin to kubepaas platform")
 			os.Exit(0)
 		}
-		auth := types.AuthCredential{}
-		if cmd.Flags().Lookup("email").Value.String() != "" || cmd.Flags().Lookup("password").Value.String() != "" {
+
+		//there are two ways user can provide auth credentials
+		//1.using --email and --password flags
+		//2.using survey prompt (using survey package)
+		//if email && password are not empty than we handle using method => (1) otherwise method => (2).
+		var auth types.AuthCredential
+
+		emailFlagValue := cmd.Flags().Lookup("email").Value.String()
+		passwordFlagValue := cmd.Flags().Lookup("password").Value.String()
+		if emailFlagValue != "" || passwordFlagValue != "" {
+			//method 1
 			var err error
-			auth,err = parseFlags(cmd)
+			auth, err = parseFlags(emailFlagValue, passwordFlagValue)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(0)
 			}
-		}else{
+		} else {
+			//method 2
 			var err error
-			auth,err = prompForUserLogin()
+			auth, err = prompForUserLogin()
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(0)
 			}
 		}
 
-		ctx,span := trace.StartSpan(context.Background(),"login")
-		defer span.End()
-
-		err := authservice.Login(ctx,auth)
+		//contact with userservice in order to login
+		err := userservice.Login(auth)
 		if err != nil {
 			fmt.Println(err)
 		}
 	},
 }
 
-func prompForUserLogin() (basicAuth types.AuthCredential,err error) {
-	if err := survey.Ask(questions.LoginUserQuestion, &basicAuth); err != nil {
-		return types.AuthCredential{},err
+func prompForUserLogin() (basicAuth types.AuthCredential, err error) {
+	if err := survey.Ask(questions.LoginUser, &basicAuth); err != nil {
+		return types.AuthCredential{}, err
 	}
-	return basicAuth,nil
+	return basicAuth, nil
 }
 
-func parseFlags(cmd *cobra.Command) (basicAuth types.AuthCredential,err error) {
-		email := cmd.Flags().Lookup("email").Value.String()
-		if email == "" {
-			return basicAuth,fmt.Errorf("You must Have to provide email for login")
-		}
-		password := cmd.Flags().Lookup("password").Value.String()
-		if password == "" {
-			return basicAuth,fmt.Errorf("You must Have to provide password for login")
-		}
-		return types.AuthCredential{Email:email,Password:password},nil
+func parseFlags(emailFlagValue, passwordFlagValue string) (basicAuth types.AuthCredential, err error) {
+	if emailFlagValue == "" {
+		return basicAuth, fmt.Errorf("You must Have to provide email for login.\nHELP: kubepaas login --help")
+	}
+	if passwordFlagValue == "" {
+		return basicAuth, fmt.Errorf("You must Have to provide password for login.\nHELP: kubepaas login --help")
+	}
+	return types.AuthCredential{Email: emailFlagValue, Password: passwordFlagValue}, nil
 }
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
 
+	//attach two flags on login cmd.
+	//i.e. kubepaas login --email=<email> --password=<password>
 	loginCmd.Flags().String("email", "", "Email address of accout you want to login")
-	loginCmd.Flags().String("password","","Password of accout you want to login")
+	loginCmd.Flags().String("password", "", "Password of accout you want to login")
 }
