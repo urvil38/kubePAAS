@@ -14,14 +14,14 @@ import (
 
 func ChangePassword(pass config.ChangePassword, authToken, email string) error {
 	timeout := 15 * time.Second
-	c := newHTTPClient(&timeout)
+	c := NewHTTPClient(&timeout)
 
 	b, err := json.Marshal(pass)
 	if err != nil {
 		return fmt.Errorf("Unable to marshal password Struct: %v", err)
 	}
 
-	req, err := http.NewRequest("PUT", fmt.Sprintf(userserviceAPI, "user/"+email+"/password"), bytes.NewReader(b))
+	req, err := http.NewRequest("PUT", fmt.Sprintf(userserviceEndpoint, "user/"+email+"/password"), bytes.NewReader(b))
 	if err != nil {
 		return err
 	}

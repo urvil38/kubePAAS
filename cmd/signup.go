@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"time"
+	"net/http"
 	"fmt"
 	"os"
 
@@ -17,7 +19,18 @@ var signupCmd = &cobra.Command{
 	Short: "Sign up for kubepaas platform",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := prompForRegisterUser()
+		var signupInfo types.UserInfo
+
+		timeout := 10 * time.Second
+		c := userservice.NewHTTPClient(&timeout)
+		
+		err := promptForRegisterInit(c.Client,&signupInfo)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(0)
+		}
+
+		err = promptForRegisterFinish(c.Client,&signupInfo)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(0)
@@ -25,12 +38,25 @@ var signupCmd = &cobra.Command{
 	},
 }
 
-func prompForRegisterUser() error {
-	var user types.UserInfo
-	if err := survey.Ask(questions.RegisterUser, &user); err != nil {
+func promptForRegisterInit(client *http.Client,signupInfo *types.UserInfo) error {
+
+	if err := survey.Ask(questions.RegisterUserInit,signupInfo) ; err != nil {
 		return err
 	}
-	err := userservice.RegisterUser(user)
+
+	err := userservice.RegistrationInit(client,*signupInfo)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func promptForRegisterFinish(client *http.Client,signupInfo *types.UserInfo) error {
+
+	if err := survey.Ask(questions.RegisterUserFinish,signupInfo); err != nil {
+		return err
+	}
+	err := userservice.RegistrationFinish(client,*signupInfo)
 	if err != nil {
 		return err
 	}

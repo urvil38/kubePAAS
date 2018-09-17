@@ -13,12 +13,20 @@ var email = survey.Question{
 		Help:    "Please provide your email for registration",
 	},
 	Validate: func(val interface{}) error {
-		paaswdReg := regexp.MustCompile(`^\w+@(gmail|yahoo|hotmail)\.[a-zA-Z]{2,3}$`)
+		paaswdReg := regexp.MustCompile(`^\w+@(gmail|yahoo)\.[a-zA-Z]{2,3}$`)
 		if str, ok := val.(string); !ok || !paaswdReg.Match([]byte(str)) {
 			return errors.New("Please enter valid email")
 		}
 		return nil
 	},
+}
+
+var random = survey.Question{
+	Name: "random",
+	Prompt: &survey.Input{
+		Message: "Please enter random string from your email:",
+	},
+	Validate: survey.Required,
 }
 
 var password = survey.Question{
@@ -72,7 +80,9 @@ var name = survey.Question{
 	Validate: survey.Required,
 }
 
-var RegisterUser = append([]*survey.Question{}, &name, &email, &password)
+var RegisterUserInit = append([]*survey.Question{},&email)
+
+var RegisterUserFinish = append([]*survey.Question{},&random,&name,&password)
 
 var LoginUser = append([]*survey.Question{}, &email, &password)
 

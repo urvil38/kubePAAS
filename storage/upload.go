@@ -9,6 +9,14 @@ import (
 	"github.com/urvil38/spinner"
 )
 
+//Size of maximum upload file
+//i.e. upload object's size should not be more than 20MB.
+const (
+	KB = 1 << (10 * 1)
+	MB = 1 << (10 * 2)
+	maxSize = 20 * MB
+)
+
 type uploadObject struct {
 	source      string
 	destination string
@@ -44,9 +52,14 @@ func (u *uploadObject) Upload() error {
 	if err != nil {
 		return err
 	}
-	b := fi.Size()
 
-	s := spinner.New(fmt.Sprintf("Uploding: %.2f KB of tar file ", float64(b)/1024))
+	b := fi.Size()
+	if b > maxSize {
+		_ = removeSourceFile(u.source)
+		return fmt.Errorf("You can't upload file which is more than 20MB,Your object size is %.2fMB",float64(b)/MB)
+	}
+
+	s := spinner.New(fmt.Sprintf("Uploding: %.2f KB of tar file ", float64(b)/KB))
 	s.Start()
 	_, err = io.Copy(writer, reader)
 	if err != nil {
@@ -56,12 +69,23 @@ func (u *uploadObject) Upload() error {
 	err = writer.Close()
 	if err != nil {
 		s.Stop()
+		_ = removeSourceFile(u.source)
 		return fmt.Errorf(" \x1b[31mPlease check your internet connection ℹ\x1b[0m")
 	}
-	fmt.Printf("Successfully uploaded file : %v\n", u.source)
-	err = os.Remove(u.source)
+
+	s.Stop()
+	fmt.Println("Successfully uploaded file ✔")
+	err = removeSourceFile(u.source)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func removeSourceFile(path string) error {
+	err := os.Remove(path)
+			if err != nil {
+			return err
 	}
 	return nil
 }

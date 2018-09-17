@@ -26,8 +26,10 @@ const (
 `
 )
 
-var ConfigValue config.Config
-var Login bool
+var (
+	ConfigValue config.Config
+	Login bool
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{

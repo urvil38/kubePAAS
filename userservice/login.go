@@ -15,7 +15,7 @@ import (
 
 func Login(auth types.AuthCredential) error {
 	timeout := 15 * time.Second
-	c := newHTTPClient(&timeout)
+	c := NewHTTPClient(&timeout)
 
 	b, err := json.Marshal(auth)
 	if err != nil {
@@ -24,7 +24,7 @@ func Login(auth types.AuthCredential) error {
 
 	s := spinner.New("Loging you in")
 	s.Start()
-	res, err := c.Client.Post(fmt.Sprintf(userserviceAPI, "login"), "application/json", bytes.NewReader(b))
+	res, err := c.Client.Post(fmt.Sprintf(userserviceEndpoint, "login"), "application/json", bytes.NewReader(b))
 	if err != nil {
 		s.Stop()
 		return fmt.Errorf("Unable to Login.Connection Timeout ⏱")
@@ -53,12 +53,12 @@ func Login(auth types.AuthCredential) error {
 		}
 		var conf config.Config
 		conf.Token, conf.Email = token, auth.Email
-		userConf, err := GetUserProfile(conf)
+		userConf, err := getUserProfile(conf)
 		if err != nil {
 			s.Stop()
 			return fmt.Errorf("Cound't get profile of user: %v", err.Error())
 		}
-		conf.ID,conf.Name = userConf.ID,userConf.Name
+		conf.ID, conf.Name = userConf.ID, userConf.Name
 		err = config.CreateConfigFile(conf)
 		if err != nil {
 			s.Stop()

@@ -11,13 +11,13 @@ import (
 	"github.com/urvil38/kubepaas/config"
 )
 
-func GetUserProfile(conf config.Config) (userConf config.UserConfig, err error) {
+func getUserProfile(conf config.Config) (userConf config.UserConfig, err error) {
 	var userConfig config.UserConfig
 
 	timeout := 15 * time.Second
-	c := newHTTPClient(&timeout)
+	c := NewHTTPClient(&timeout)
 
-	req, err := http.NewRequest("GET", fmt.Sprintf(userserviceAPI, "user"+"/"+conf.Email), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf(userserviceEndpoint, "user"+"/"+conf.Email), nil)
 	req.Header.Add("x-access-token", conf.AuthToken.Token)
 	res, err := c.Client.Do(req)
 	if err != nil {

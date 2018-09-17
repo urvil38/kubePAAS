@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	userserviceAPI = "https://kubepaas.appspot.com/v1/%s"
+	userserviceEndpoint = "https://kubepaas.appspot.com/v1/%s"
 )
 
-func newHTTPClient(timeout *time.Duration) *types.HttpClient {
+func NewHTTPClient(timeout *time.Duration) *types.HttpClient {
 	if timeout != nil {
 		httpTransport := &http.Transport{
 			Dial: (&net.Dialer{

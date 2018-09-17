@@ -34,12 +34,12 @@ var loginCmd = &cobra.Command{
 		passwordFlagValue := cmd.Flags().Lookup("password").Value.String()
 		if emailFlagValue != "" || passwordFlagValue != "" {
 			//method 1
-			var err error
-			auth, err = parseFlags(emailFlagValue, passwordFlagValue)
+			err := parseFlags(emailFlagValue, passwordFlagValue)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(0)
 			}
+			auth = types.AuthCredential{Email: emailFlagValue, Password: passwordFlagValue}
 		} else {
 			//method 2
 			var err error
@@ -65,14 +65,14 @@ func prompForUserLogin() (basicAuth types.AuthCredential, err error) {
 	return basicAuth, nil
 }
 
-func parseFlags(emailFlagValue, passwordFlagValue string) (basicAuth types.AuthCredential, err error) {
+func parseFlags(emailFlagValue, passwordFlagValue string) (err error) {
 	if emailFlagValue == "" {
-		return basicAuth, fmt.Errorf("You must Have to provide email for login.\nHELP: kubepaas login --help")
+		return fmt.Errorf("You must Have to provide email for login.\nHELP: kubepaas login --help")
 	}
 	if passwordFlagValue == "" {
-		return basicAuth, fmt.Errorf("You must Have to provide password for login.\nHELP: kubepaas login --help")
+		return fmt.Errorf("You must Have to provide password for login.\nHELP: kubepaas login --help")
 	}
-	return types.AuthCredential{Email: emailFlagValue, Password: passwordFlagValue}, nil
+	return nil
 }
 
 func init() {
