@@ -38,6 +38,7 @@ func ChangePassword(pass config.ChangePassword, authToken, email string) error {
 	}
 
 	if res.Body != nil {
+		s.Stop()
 		res.Body.Close()
 	}
 

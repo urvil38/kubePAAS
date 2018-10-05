@@ -8,7 +8,7 @@ import (
 	"github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
 	"github.com/urvil38/kubepaas/storage"
-	"github.com/urvil38/kubepaas/util"
+	"github.com/urvil38/kubepaas/archive"
 )
 
 // deployCmd represents the deploy command
@@ -61,7 +61,7 @@ func generateTarFolder() (path string, err error) {
 		return "", err
 	}
 	temptar = temptar + "-" + id.String()
-	targetPath, err := util.Tarit(wd, temptar)
+	targetPath, err := archive.Tarit(wd, temptar)
 	if err != nil {
 		return "", err
 	}
