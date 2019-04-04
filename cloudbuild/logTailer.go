@@ -53,10 +53,10 @@ func (l logTailer) Poll(isLast bool) {
 	}
 }
 
-func printLastLine() {
+func printFirstLine() {
 	fmt.Println(" START OF CLOUDBUILD ")
 }
 
-func printFirstLine() {
+func printLastLine() {
 	fmt.Println(" END OF CLOUDBUILD ")
 }
