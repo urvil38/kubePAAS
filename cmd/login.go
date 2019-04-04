@@ -6,7 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/urvil38/kubepaas/questions"
-	"github.com/urvil38/kubepaas/types"
 	"github.com/urvil38/kubepaas/userservice"
 	"github.com/urvil38/kubepaas/util"
 	"gopkg.in/AlecAivazis/survey.v1"
@@ -28,7 +27,7 @@ var loginCmd = &cobra.Command{
 		//1.using --email and --password flags
 		//2.using survey prompt (using survey package)
 		//if email && password are not empty than we handle using method => (1) otherwise method => (2).
-		var auth types.AuthCredential
+		var auth questions.AuthCredential
 
 		emailFlagValue := cmd.Flags().Lookup("email").Value.String()
 		passwordFlagValue := cmd.Flags().Lookup("password").Value.String()
@@ -39,7 +38,7 @@ var loginCmd = &cobra.Command{
 				fmt.Println(err)
 				os.Exit(0)
 			}
-			auth = types.AuthCredential{Email: emailFlagValue, Password: passwordFlagValue}
+			auth = questions.AuthCredential{Email: emailFlagValue, Password: passwordFlagValue}
 		} else {
 			//method 2
 			var err error
@@ -58,9 +57,9 @@ var loginCmd = &cobra.Command{
 	},
 }
 
-func prompForUserLogin() (basicAuth types.AuthCredential, err error) {
+func prompForUserLogin() (basicAuth questions.AuthCredential, err error) {
 	if err := survey.Ask(questions.LoginUser, &basicAuth); err != nil {
-		return types.AuthCredential{}, err
+		return questions.AuthCredential{}, err
 	}
 	return basicAuth, nil
 }

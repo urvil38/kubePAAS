@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/urvil38/kubepaas/questions"
-	"github.com/urvil38/kubepaas/types"
 	"github.com/urvil38/kubepaas/userservice"
+	"github.com/urvil38/kubepaas/http/client"
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
@@ -19,18 +19,18 @@ var signupCmd = &cobra.Command{
 	Short: "Sign up for kubepaas platform",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		var signupInfo types.UserInfo
+		var signupInfo questions.UserInfo
 
 		timeout := 10 * time.Second
-		c := userservice.NewHTTPClient(&timeout)
+		client := client.NewHTTPClient(&timeout)
 		
-		err := promptForRegisterInit(c.Client,&signupInfo)
+		err := promptForRegisterInit(client,&signupInfo)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(0)
 		}
 
-		err = promptForRegisterFinish(c.Client,&signupInfo)
+		err = promptForRegisterFinish(client,&signupInfo)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(0)
@@ -38,7 +38,7 @@ var signupCmd = &cobra.Command{
 	},
 }
 
-func promptForRegisterInit(client *http.Client,signupInfo *types.UserInfo) error {
+func promptForRegisterInit(client *http.Client,signupInfo *questions.UserInfo) error {
 
 	if err := survey.Ask(questions.RegisterUserInit,signupInfo) ; err != nil {
 		return err
@@ -51,7 +51,7 @@ func promptForRegisterInit(client *http.Client,signupInfo *types.UserInfo) error
 	return nil
 }
 
-func promptForRegisterFinish(client *http.Client,signupInfo *types.UserInfo) error {
+func promptForRegisterFinish(client *http.Client,signupInfo *questions.UserInfo) error {
 
 	if err := survey.Ask(questions.RegisterUserFinish,signupInfo); err != nil {
 		return err

@@ -1,7 +1,6 @@
 package archive
 
 import (
-	"syscall"
 	"archive/tar"
 	"compress/gzip"
 	"fmt"
@@ -9,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 )
 
 //Tarit tar the folder given by source path and place it at target path
-func Tarit(source, target string) (path string, err error) {
+func MakeTarBall(source, target string) (path string, err error) {
 
 	if _, err := os.Stat(source); err != nil {
 		return "", fmt.Errorf("Unable to tar file - %v", err.Error())
@@ -27,38 +27,42 @@ func Tarit(source, target string) (path string, err error) {
 	if filepath.Ext(target) != "tgz" || filepath.Ext(target) == "" {
 		target = target + ".tgz"
 	}
-	fromFile, err := os.Create(target)
+	toFile, err := os.Create(target)
 	if err != nil {
 		return "", fmt.Errorf("Unable to tar file - %v", err.Error())
 	}
 
 	//gzip writer
-	gzw := gzip.NewWriter(fromFile)
+	gzw := gzip.NewWriter(toFile)
 	defer gzw.Close()
 
 	//tar writer
-	tw := tar.NewWriter(gzw)
-	defer tw.Close()
+	tgzw := tar.NewWriter(gzw)
+	defer tgzw.Close()
 
-	filepath.Walk(source, func(file string, fi os.FileInfo, err error) error {
+	filepath.Walk(source, func(file string, fileInfo os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if fi.IsDir() && fi.Name()[0] == '.' || fi.IsDir() && fi.Name() == "node_modules" {
+		if fileInfo.Name()[0] == '.' {
+			return nil
+		}
+
+		if fileInfo.IsDir() && fileInfo.Name()[0] == '.' || fileInfo.IsDir() && fileInfo.Name() == "node_modules" {
 			return filepath.SkipDir
 		}
 
-		header, err := tar.FileInfoHeader(fi, fi.Name())
+		header, err := tar.FileInfoHeader(fileInfo, fileInfo.Name())
 		if err != nil {
 			return err
 		}
 
-		s,ok := fi.Sys().(*syscall.Stat_t)
+		stat, ok := fileInfo.Sys().(*syscall.Stat_t)
 		if !ok {
 			return fmt.Errorf("cannot convert stat value to syscall.Stat_t")
 		}
-	
+
 		//headerType for store type of header
 		//   001          010            100     <- byteOrder
 		//	isDir	   isSymLink     isHardLink
@@ -67,43 +71,43 @@ func Tarit(source, target string) (path string, err error) {
 		var headerType byte
 
 		// Check if file is Directory.
-		if fi.IsDir() {
+		if fileInfo.IsDir() {
 			headerType |= isDir
 		}
 
 		// True if the file is a symlink.
-		if fi.Mode() & os.ModeSymlink != 0 {
+		if fileInfo.Mode()&os.ModeSymlink != 0 {
 			headerType |= isSymLink
 		}
 
 		// Check if file have hardlink.
-		nlink := uint32(s.Nlink)
+		nlink := uint32(stat.Nlink)
 		if nlink > 1 {
 			headerType |= isHardLink
 		}
 
 		header.Name = strings.TrimPrefix(strings.Replace(file, source, "", -1), string(filepath.Separator))
-		
+
 		//setting header's Typeflag according to headerType
-		if headerType & isSymLink == isSymLink {
+		if headerType&isSymLink == isSymLink {
 			header.Typeflag = tar.TypeSymlink
-		} 
-		if  headerType & isHardLink == isHardLink {
+		}
+		if headerType&isHardLink == isHardLink {
 			header.Typeflag = tar.TypeLink
-		} 
-		if  headerType & isDir == isDir {
+		}
+		if headerType&isDir == isDir {
 			header.Name += "/"
 			header.Typeflag = tar.TypeDir
 		}
 
 		//writing header information to tar-gzip writer
-		if err := tw.WriteHeader(header); err != nil {
+		if err := tgzw.WriteHeader(header); err != nil {
 			return err
 		}
 
 		//if file have symlink or is directory we just return
 		//because we can't open that file
-		if headerType & isSymLink == isSymLink || headerType & isDir == isDir {
+		if headerType&isSymLink == isSymLink || headerType&isDir == isDir {
 			return nil
 		}
 
@@ -116,7 +120,7 @@ func Tarit(source, target string) (path string, err error) {
 
 		//Copy content of file to tar-gzip writer
 		//This step do tar and gzip of given file f
-		if _, err := io.Copy(tw, f); err != nil {
+		if _, err := io.Copy(tgzw, f); err != nil {
 			return err
 		}
 		return nil

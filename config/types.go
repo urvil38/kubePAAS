@@ -5,6 +5,18 @@ type Config struct {
 	UserConfig
 }
 
+type AppConfig struct {
+	ProjectName string `json:"project_name"`
+	Runtime string `json:"runtime"`
+	Port string `json:"port"`
+}
+
+type ProjectMetaData struct {
+	ProjectName string `json:"project_name"`
+	CurrentVersion string `json:"current_version"`
+	Versions []string `json:"versions"`
+}
+
 type AuthToken struct {
 	Token string `json:"token"`
 }

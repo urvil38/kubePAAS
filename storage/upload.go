@@ -12,8 +12,8 @@ import (
 //Size of maximum upload file
 //i.e. upload object's size should not be more than 20MB.
 const (
-	KB = 1 << (10 * 1)
-	MB = 1 << (10 * 2)
+	KB = 1 << 10
+	MB = 1 << 20
 	maxSize = 20 * MB
 )
 
@@ -31,7 +31,7 @@ func NewUploadObject(sourcePath, destinationPath, bucketName string) *uploadObje
 	}
 }
 
-func (u *uploadObject) Upload() error {
+func (u *uploadObject) UploadTarBallToGCS() error {
 	client, err := GetStorageClient()
 	if err != nil {
 		return err
@@ -48,12 +48,12 @@ func (u *uploadObject) Upload() error {
 		return err
 	}
 
-	fi, err := reader.Stat()
+	fileInfo, err := reader.Stat()
 	if err != nil {
 		return err
 	}
 
-	b := fi.Size()
+	b := fileInfo.Size()
 	if b > maxSize {
 		_ = removeSourceFile(u.source)
 		return fmt.Errorf("You can't upload file which is more than 20MB,Your object size is %.2fMB",float64(b)/MB)
@@ -67,6 +67,7 @@ func (u *uploadObject) Upload() error {
 		return err
 	}
 	err = writer.Close()
+	fmt.Print(err)
 	if err != nil {
 		s.Stop()
 		_ = removeSourceFile(u.source)

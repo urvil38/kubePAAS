@@ -9,13 +9,14 @@ import (
 	"time"
 
 	"github.com/urvil38/kubepaas/config"
-	"github.com/urvil38/kubepaas/types"
+	"github.com/urvil38/kubepaas/questions"
 	"github.com/urvil38/spinner"
+	"github.com/urvil38/kubepaas/http/client"
 )
 
-func Login(auth types.AuthCredential) error {
+func Login(auth questions.AuthCredential) error {
 	timeout := 15 * time.Second
-	c := NewHTTPClient(&timeout)
+	client := client.NewHTTPClient(&timeout)
 
 	b, err := json.Marshal(auth)
 	if err != nil {
@@ -24,7 +25,7 @@ func Login(auth types.AuthCredential) error {
 
 	s := spinner.New("Loging you in")
 	s.Start()
-	res, err := c.Client.Post(fmt.Sprintf(userserviceEndpoint, "login"), "application/json", bytes.NewReader(b))
+	res, err := client.Post(fmt.Sprintf(userserviceEndpoint, "login"), "application/json", bytes.NewReader(b))
 	if err != nil {
 		s.Stop()
 		return fmt.Errorf("Unable to Login.Connection Timeout ⏱")

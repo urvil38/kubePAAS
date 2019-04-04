@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/urvil38/spinner"
-
 	"github.com/urvil38/kubepaas/config"
+	"github.com/urvil38/kubepaas/http/client"
 )
 
 func ChangePassword(pass config.ChangePassword, authToken, email string) error {
 	timeout := 15 * time.Second
-	c := NewHTTPClient(&timeout)
+	client := client.NewHTTPClient(&timeout)
 
 	b, err := json.Marshal(pass)
 	if err != nil {
@@ -31,7 +31,7 @@ func ChangePassword(pass config.ChangePassword, authToken, email string) error {
 	s := spinner.New("Changing Password")
 	s.Start()
 
-	res, err := c.Client.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		s.Stop()
 		return fmt.Errorf("Unable to Change Password.Check Internet Connection")

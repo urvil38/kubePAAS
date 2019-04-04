@@ -29,6 +29,11 @@ const (
 var (
 	ConfigValue config.Config
 	Login bool
+	PROJECT_ROOT string
+)
+
+const (
+	CAN_UPDATE_VERSION = false
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -59,6 +64,7 @@ func printBanner() {
 }
 
 func init() {
+	PROJECT_ROOT , _ = os.Getwd()
 
 	err := os.MkdirAll(util.GetConfigFolderPath(), 0777)
 	if err != nil {

@@ -5,11 +5,12 @@ import (
 	"bytes"
 	"fmt"
 	"encoding/json"
-	"github.com/urvil38/kubepaas/types"
 	"net/http"
+
+	"github.com/urvil38/kubepaas/questions"
 )
 
-func RegistrationInit(client *http.Client,signupInfo types.UserInfo) error {
+func RegistrationInit(client *http.Client,signupInfo questions.UserInfo) error {
 	b,err := json.Marshal(signupInfo)
 	if err != nil {
 		return fmt.Errorf("Couldn't marshal registration details: %v",err.Error());
@@ -40,7 +41,7 @@ func RegistrationInit(client *http.Client,signupInfo types.UserInfo) error {
 	return nil
 }
 
-func RegistrationFinish(client *http.Client,signupInfo types.UserInfo) error {
+func RegistrationFinish(client *http.Client,signupInfo questions.UserInfo) error {
 	b,err := json.Marshal(signupInfo)
 	if err != nil {
 		return fmt.Errorf("Couldn't marshal registration details: %v",err.Error());

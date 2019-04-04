@@ -9,17 +9,18 @@ import (
 	"time"
 
 	"github.com/urvil38/kubepaas/config"
+	"github.com/urvil38/kubepaas/http/client"
 )
 
 func getUserProfile(conf config.Config) (userConf config.UserConfig, err error) {
 	var userConfig config.UserConfig
 
 	timeout := 15 * time.Second
-	c := NewHTTPClient(&timeout)
+	client := client.NewHTTPClient(&timeout)
 
 	req, err := http.NewRequest("GET", fmt.Sprintf(userserviceEndpoint, "user"+"/"+conf.Email), nil)
 	req.Header.Add("x-access-token", conf.AuthToken.Token)
-	res, err := c.Client.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		return userConfig, errors.New("Unable to get Profile.Check your internet connection")
 	}
