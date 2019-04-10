@@ -1,19 +1,22 @@
 package storage
 
 import (
+	"path/filepath"
+	"time"
+	"github.com/briandowns/spinner"
 	"context"
 	"fmt"
 	"io"
 	"os"
 
-	"github.com/urvil38/spinner"
+	"github.com/fatih/color"
 )
 
 //Size of maximum upload file
 //i.e. upload object's size should not be more than 20MB.
 const (
-	KB = 1 << 10
-	MB = 1 << 20
+	KB      = 1 << 10
+	MB      = 1 << 20
 	maxSize = 20 * MB
 )
 
@@ -56,26 +59,27 @@ func (u *uploadObject) UploadTarBallToGCS() error {
 	b := fileInfo.Size()
 	if b > maxSize {
 		_ = removeSourceFile(u.source)
-		return fmt.Errorf("You can't upload file which is more than 20MB,Your object size is %.2fMB",float64(b)/MB)
+		return fmt.Errorf("You can't upload file which is more than 20MB,Your object size is %.2fMB", float64(b)/MB)
 	}
-
-	s := spinner.New(fmt.Sprintf("Uploding: %.2f KB of tar file ", float64(b)/KB))
+	
+	s := spinner.New(spinner.CharSets[11],100*time.Millisecond)
+	s.Color("yellow","bold")
+	s.Suffix = fmt.Sprintf(" Uploading: %.2f KB of source code file ", float64(b)/KB)
 	s.Start()
+
 	_, err = io.Copy(writer, reader)
 	if err != nil {
 		s.Stop()
 		return err
 	}
 	err = writer.Close()
-	fmt.Print(err)
 	if err != nil {
 		s.Stop()
 		_ = removeSourceFile(u.source)
 		return fmt.Errorf(" \x1b[31mPlease check your internet connection ℹ\x1b[0m")
 	}
-
 	s.Stop()
-	fmt.Println("Successfully uploaded file ✔")
+	fmt.Println(color.HiGreenString("Successfully uploaded %s file ✔︎",filepath.Base(u.source)))
 	err = removeSourceFile(u.source)
 	if err != nil {
 		return err
@@ -85,8 +89,8 @@ func (u *uploadObject) UploadTarBallToGCS() error {
 
 func removeSourceFile(path string) error {
 	err := os.Remove(path)
-			if err != nil {
-			return err
+	if err != nil {
+		return err
 	}
 	return nil
 }

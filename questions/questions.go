@@ -80,10 +80,10 @@ var name = survey.Question{
 	Validate: survey.Required,
 }
 
-var RegisterUserInit = append([]*survey.Question{},&email)
+var RegisterUserInit = append([]*survey.Question{}, &email)
 
-var RegisterUserFinish = append([]*survey.Question{},&random,&name,&password)
+var RegisterUserFinish = append([]*survey.Question{}, &random, &name, &password)
 
 var LoginUser = append([]*survey.Question{}, &email, &password)
 
-var ChangePassword = append([]*survey.Question{},&currPassword,&newPassword)
+var ChangePassword = append([]*survey.Question{}, &currPassword, &newPassword)

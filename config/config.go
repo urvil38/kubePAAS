@@ -1,12 +1,12 @@
 package config
 
 import (
-	"encoding/json"
-	"path/filepath"
-	"os"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 
 	"github.com/urvil38/kubepaas/util"
 )
@@ -15,8 +15,8 @@ func CreateConfigFile(c Config) error {
 	buffer := new(bytes.Buffer)
 
 	buffer.WriteString(c.Token + "\n" + c.Email + "\n" + c.ID + "\n" + c.Name)
-	confFileName ,err := util.GetConfigFilePath()
-	if err  != nil {
+	confFileName, err := util.GetConfigFilePath()
+	if err != nil {
 		return err
 	}
 	err = ioutil.WriteFile(confFileName, buffer.Bytes(), 0400)
@@ -40,31 +40,31 @@ func CheckAppConfigFileExists() bool {
 	return true
 }
 
-func getAppConfigPath() (string,error) {
-	wd,err := os.Getwd()
+func getAppConfigPath() (string, error) {
+	wd, err := os.Getwd()
 	if err != nil {
 		fmt.Printf("Couldn't Find current working directory beacause of : %v\n", err)
 	}
 
 	if CheckAppConfigFileExists() {
-		return filepath.Join(wd,"app.json"),nil
+		return filepath.Join(wd, "app.json"), nil
 	}
-	return "",fmt.Errorf("Coun't find app.json file")
+	return "", fmt.Errorf("Coun't find app.json file")
 }
 
-func ParseAppConfigFile() (AppConfig,error) {
+func ParseAppConfigFile() (AppConfig, error) {
 	var appConfig AppConfig
-	path,err := getAppConfigPath()
+	path, err := getAppConfigPath()
 	if err != nil {
-		return appConfig,err
+		return appConfig, err
 	}
-	b,err := ioutil.ReadFile(path)
+	b, err := ioutil.ReadFile(path)
 	if err != nil {
-		return appConfig,err
+		return appConfig, err
 	}
-	err = json.Unmarshal(b,&appConfig)
+	err = json.Unmarshal(b, &appConfig)
 	if err != nil {
-		return appConfig,err
+		return appConfig, err
 	}
-	return appConfig,nil
+	return appConfig, nil
 }

@@ -1,10 +1,12 @@
 package cloudbuild
 
 import (
-	"io/ioutil"
-	"strings"
 	"context"
 	"fmt"
+	"io/ioutil"
+	"strings"
+
+	"github.com/urvil38/kubepaas/banner"
 )
 
 type logTailer struct {
@@ -12,32 +14,31 @@ type logTailer struct {
 	logObject string
 }
 
-var cursor int64
-
-const (
-	gcsURLPattern = `https://www.googleapis.com/storage/v1/b/%s/o/%s?alt=media`
-)
-
 func NewLogTailer(logBucket, logObject string) *logTailer {
 	return &logTailer{
 		logBucket: logBucket,
 		logObject: logObject,
 	}
 }
-
+var cursor = 0
 func (l logTailer) Poll(isLast bool) {
-	client,err := getCloudBuildLogStorageClient()
+	if isLast {
+		cursor = 0
+	}
+
+	client, err := getCloudBuildLogStorageClient()
 	if err != nil {
 		fmt.Print(err)
 	}
 
-	res,err := client.Bucket(l.logBucket).Object(l.logObject).NewRangeReader(context.Background(),cursor,-1)
+	res, err := client.Bucket(l.logBucket).Object(l.logObject).NewRangeReader(context.Background(), int64(cursor), -1)
 	if err != nil {
 		return
 	}
 
 	if res != nil {
-		b,err := ioutil.ReadAll(res)
+		b, err := ioutil.ReadAll(res)
+		defer res.Close()
 		if err != nil {
 			fmt.Print(err)
 		}
@@ -45,18 +46,19 @@ func (l logTailer) Poll(isLast bool) {
 		if cursor == 0 {
 			printFirstLine()
 		}
-		cursor += int64(len(b))
-		fmt.Print(strings.TrimRight(string(b),"\n"))
-		if isLast {
-			printLastLine()
-		}
+		cursor += len(b)
+		fmt.Print(strings.TrimRight(string(b), "\n"))
+	}
+
+	if isLast {
+		printLastLine()
 	}
 }
 
 func printFirstLine() {
-	fmt.Println(" START OF CLOUDBUILD ")
+	fmt.Println(banner.StartCloudBuildLog())
 }
 
 func printLastLine() {
-	fmt.Println(" END OF CLOUDBUILD ")
+	fmt.Println(banner.EndCloudBuildLog())
 }

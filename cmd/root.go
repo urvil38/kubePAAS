@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	banner = `
+	Banner = `
 
 ██╗  ██╗██╗   ██╗██████╗ ███████╗██████╗  █████╗  █████╗ ███████╗
 ██║ ██╔╝██║   ██║██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔════╝
@@ -27,13 +27,9 @@ const (
 )
 
 var (
-	ConfigValue config.Config
-	Login bool
+	ConfigValue  config.Config
+	Login        bool
 	PROJECT_ROOT string
-)
-
-const (
-	CAN_UPDATE_VERSION = false
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -60,11 +56,11 @@ func Execute() {
 func printBanner() {
 	rand.Seed(time.Now().UnixNano())
 	colorCounter := rand.Intn(7)
-	fmt.Printf("\x1b[3%dm%v\x1b[0m", colorCounter+1, banner)
+	fmt.Printf("\x1b[3%dm%v\x1b[0m", colorCounter+1, Banner)
 }
 
 func init() {
-	PROJECT_ROOT , _ = os.Getwd()
+	PROJECT_ROOT, _ = os.Getwd()
 
 	err := os.MkdirAll(util.GetConfigFolderPath(), 0777)
 	if err != nil {
@@ -72,15 +68,15 @@ func init() {
 		os.Exit(1)
 	}
 
-	configFilePath,_ := util.GetConfigFilePath()
+	configFilePath, _ := util.GetConfigFilePath()
 
 	if _, err := os.Stat(configFilePath); err == nil {
 		Login = true
 	}
 
 	if util.ConfigFileExists() {
-		confFileName,_ := util.GetConfigFilePath()
-	
+		confFileName, _ := util.GetConfigFilePath()
+
 		b, err := ioutil.ReadFile(confFileName)
 		if err != nil {
 			return

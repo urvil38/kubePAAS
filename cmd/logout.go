@@ -21,7 +21,7 @@ var logoutCmd = &cobra.Command{
 }
 
 func logOut() error {
-	configFilePath,err := util.GetConfigFilePath()
+	configFilePath, err := util.GetConfigFilePath()
 	if err != nil {
 		return err
 	}

@@ -6,12 +6,12 @@ import (
 	"path/filepath"
 )
 
-func GetConfigFilePath() (string,error) {
+func GetConfigFilePath() (string, error) {
 	home := os.Getenv("HOME")
 	if home == "" {
-		return "",fmt.Errorf("HOME env is not found")
+		return "", fmt.Errorf("HOME env is not found")
 	}
-	return filepath.Join(home, ".config", "kubepaas", "config"),nil
+	return filepath.Join(home, ".config", "kubepaas", "config"), nil
 }
 
 func GetConfigFolderPath() string {
@@ -20,7 +20,7 @@ func GetConfigFolderPath() string {
 }
 
 func ConfigFileExists() bool {
-	path,err := GetConfigFilePath()
+	path, err := GetConfigFilePath()
 	if err != nil {
 		return false
 	}

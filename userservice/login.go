@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/urvil38/kubepaas/config"
+	"github.com/urvil38/kubepaas/http/client"
 	"github.com/urvil38/kubepaas/questions"
 	"github.com/urvil38/spinner"
-	"github.com/urvil38/kubepaas/http/client"
 )
 
 func Login(auth questions.AuthCredential) error {

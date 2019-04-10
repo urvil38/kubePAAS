@@ -29,7 +29,7 @@ to quickly create a Cobra application.`,
 }
 
 func getProfile() error {
-	fmt.Printf("UserID : %s\nName   : %v\nEmail  : %v\n", ConfigValue.ID,ConfigValue.Name,ConfigValue.Email)
+	fmt.Printf("UserID : %s\nName   : %v\nEmail  : %v\n", ConfigValue.ID, ConfigValue.Name, ConfigValue.Email)
 	return nil
 }
 

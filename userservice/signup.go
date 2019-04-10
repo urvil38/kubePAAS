@@ -1,22 +1,22 @@
 package userservice
 
 import (
-	"github.com/urvil38/spinner"
 	"bytes"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"github.com/urvil38/spinner"
 	"net/http"
 
 	"github.com/urvil38/kubepaas/questions"
 )
 
-func RegistrationInit(client *http.Client,signupInfo questions.UserInfo) error {
-	b,err := json.Marshal(signupInfo)
+func RegistrationInit(client *http.Client, signupInfo questions.UserInfo) error {
+	b, err := json.Marshal(signupInfo)
 	if err != nil {
-		return fmt.Errorf("Couldn't marshal registration details: %v",err.Error());
+		return fmt.Errorf("Couldn't marshal registration details: %v", err.Error())
 	}
 
-	res,err := client.Post(fmt.Sprintf(userserviceEndpoint,"user"),"application/json",bytes.NewReader(b))
+	res, err := client.Post(fmt.Sprintf(userserviceEndpoint, "user"), "application/json", bytes.NewReader(b))
 	if err != nil {
 		return fmt.Errorf("Unable to Signup.Check Internet Connection")
 	}
@@ -31,7 +31,7 @@ func RegistrationInit(client *http.Client,signupInfo questions.UserInfo) error {
 
 	switch res.StatusCode {
 	case http.StatusOK:
-		fmt.Printf("Check %v for authectication code\n",signupInfo.Email)
+		fmt.Printf("Check %v for authectication code\n", signupInfo.Email)
 	case http.StatusConflict:
 		return fmt.Errorf("User is already exists!")
 	default:
@@ -41,15 +41,15 @@ func RegistrationInit(client *http.Client,signupInfo questions.UserInfo) error {
 	return nil
 }
 
-func RegistrationFinish(client *http.Client,signupInfo questions.UserInfo) error {
-	b,err := json.Marshal(signupInfo)
+func RegistrationFinish(client *http.Client, signupInfo questions.UserInfo) error {
+	b, err := json.Marshal(signupInfo)
 	if err != nil {
-		return fmt.Errorf("Couldn't marshal registration details: %v",err.Error());
+		return fmt.Errorf("Couldn't marshal registration details: %v", err.Error())
 	}
-	
+
 	s := spinner.New("Registering You")
 	s.Start()
-	res,err := client.Post(fmt.Sprintf(userserviceEndpoint,"user"),"application/json",bytes.NewReader(b))
+	res, err := client.Post(fmt.Sprintf(userserviceEndpoint, "user"), "application/json", bytes.NewReader(b))
 	if err != nil {
 		s.Stop()
 		return fmt.Errorf("Unable to Signup.Check Internet Connection")
@@ -65,7 +65,7 @@ func RegistrationFinish(client *http.Client,signupInfo questions.UserInfo) error
 	}
 
 	s.Stop()
-	switch res.StatusCode{
+	switch res.StatusCode {
 	case http.StatusUnauthorized:
 		return fmt.Errorf("Email is not valid!!")
 	}
