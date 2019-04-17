@@ -62,14 +62,14 @@ It require app.yaml file to be in your current directory where you running kubep
 		}
 
 		var projectMetaData config.ProjectMetaData
-		if projectMetaDataFileExist() {
+		if config.ProjectMetaDataFileExist() {
 			f, _ := os.Open(filepath.Join(PROJECT_ROOT, ".project.json"))
 			defer f.Close()
 			b, _ := ioutil.ReadAll(f)
 			_ = json.Unmarshal(b, &projectMetaData)
 		}
 
-		if !projectMetaDataFileExist() {
+		if !config.ProjectMetaDataFileExist() {
 			_, err := os.Create(filepath.Join(PROJECT_ROOT, ".project.json"))
 			if err != nil {
 				fmt.Printf("Coun't create project.json file : %v\n", err)
@@ -221,13 +221,6 @@ func generateTarBallFromKubernetes(currentVersion string) (path string,err error
 		return "",err
 	}
 	return targetPath,nil
-}
-
-func projectMetaDataFileExist() bool {
-	if _, err := os.Stat(filepath.Join(PROJECT_ROOT, ".project.json")); err != nil {
-		return false
-	}
-	return true
 }
 
 func generateNewVersionNumber() (string, error) {

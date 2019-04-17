@@ -33,6 +33,12 @@ const kubernetesMessage = `
 ═══════════════════════════════════════════════════════
 `
 
+const updatekubernetesMessage = `
+═══════════════════════════════════════════════════════
+███████████ Updating Kubernetes Config ❅  ███████████
+═══════════════════════════════════════════════════════
+`
+
 const uploadSourceCode = `
 ═══════════════════════════════════════════════════
 ███████████ ⬆︎  Uploading Source Code ⬆︎  ███████████
@@ -54,19 +60,19 @@ const endCloudLog = `
 `
 
 var projectInfo = `
-	╔══════════════════╦═══════════════════════════════════════════════╗
-	║ Project-Name     ║  %-40s     ║
-	╠══════════════════╬═══════════════════════════════════════════════╣
-	║ Version          ║  %-40s     ║
-	╠══════════════════╬═══════════════════════════════════════════════╣
-	║ Runtime          ║  %-40s     ║
-	╠══════════════════╬═══════════════════════════════════════════════╣
-	║ Source           ║  %-40s     ║
-	╠══════════════════╬═══════════════════════════════════════════════╣
-	║ URL              ║  %-40s     ║
-	╠══════════════════╬═══════════════════════════════════════════════╣
-	║ Deployment-Time  ║  %-40s     ║
-	╚══════════════════╩═══════════════════════════════════════════════╝
+	╔══════════════════╦═══════════════════════════════════════════════════════════╗
+	║ Project-Name     ║  %-50s       ║
+	╠══════════════════╬═══════════════════════════════════════════════════════════╣
+	║ Version          ║  %-50s       ║
+	╠══════════════════╬═══════════════════════════════════════════════════════════╣
+	║ Runtime          ║  %-50s       ║
+	╠══════════════════╬═══════════════════════════════════════════════════════════╣
+	║ Source           ║  %-50s       ║
+	╠══════════════════╬═══════════════════════════════════════════════════════════╣
+	║ URL              ║  %-50s       ║
+	╠══════════════════╬═══════════════════════════════════════════════════════════╣
+	║ Deployment-Time  ║  %-50s       ║
+	╚══════════════════╩═══════════════════════════════════════════════════════════╝
 `
 
 func PrintDeployingMessage() string {
@@ -93,12 +99,24 @@ func SuccessKubernetesCloudbuildMessage() string {
 	return color.HiGreenString(" Successfully Generated kubernetes-cloudbuild.json ✔︎")
 }
 
+func SuccessUpdateKubernetesCloudbuildMessage() string {
+	return color.HiGreenString(" Successfully Updated kubernetes-cloudbuild.json ✔︎")
+}
+
 func PrintKubernetesMessage() string {
 	return color.HiBlueString(kubernetesMessage)
 }
 
+func PrintKubernetesUpdateMessage() string {
+	return color.HiBlueString(updatekubernetesMessage)
+}
+
 func SuccessKubernetesMessage() string {
 	return color.HiGreenString(" Successfully Generated kubernetes.yaml ✔︎")
+}
+
+func SuccessUpdateKubernetesMessage() string {
+	return color.HiGreenString(" Successfully Updated kubernetes.yaml ✔︎")
 }
 
 func PrintProjectInfo(config config.AppConfig,projectMetadata config.ProjectMetaData) string {

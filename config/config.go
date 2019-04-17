@@ -68,3 +68,11 @@ func ParseAppConfigFile() (AppConfig, error) {
 	}
 	return appConfig, nil
 }
+
+func ProjectMetaDataFileExist() bool {
+	wd,_ := os.Getwd()
+	if _, err := os.Stat(filepath.Join(wd, ".project.json")); err != nil {
+		return false
+	}
+	return true
+}

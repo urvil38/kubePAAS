@@ -25,9 +25,9 @@ func RegistrationInit(client *http.Client, signupInfo questions.UserInfo) error 
 		defer res.Body.Close()
 	}
 
-	if res.TLS == nil {
-		fmt.Println("WARNING! Communication is not secure, please consider using HTTPS. Letsencrypt.org offers free SSL/TLS certificates.")
-	}
+	// if res.TLS == nil {
+	// 	fmt.Println("WARNING! Communication is not secure, please consider using HTTPS. Letsencrypt.org offers free SSL/TLS certificates.")
+	// }
 
 	switch res.StatusCode {
 	case http.StatusOK:

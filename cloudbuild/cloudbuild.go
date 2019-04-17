@@ -82,7 +82,6 @@ func CreateNewBuild(projectName string,buildType string) error {
 
 type logConfig struct {
 	buildID   string
-	logURL    string
 	logBucket string
 }
 
@@ -102,7 +101,6 @@ func waitAndStreamLogs(buildOp *cloudbuild.Operation) error {
 
 	lc := logConfig{
 		buildID:   cb.Build.ID,
-		logURL:    cb.Build.LogURL,
 		logBucket: cb.Build.LogsBucket,
 	}
 
@@ -127,7 +125,7 @@ func waitAndStreamLogs(buildOp *cloudbuild.Operation) error {
 
 		finalStatus := getStatusFromOperation(op)
 		if finalStatus != "SUCCESS" {
-			fmt.Printf("Cloud build failed. Faliure status : %v\n", finalStatus)
+			return fmt.Errorf("cloud build failed. Faliure status : %v", finalStatus)
 		}
 	}
 	return nil
