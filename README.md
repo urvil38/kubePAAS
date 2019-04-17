@@ -6,3 +6,7 @@
 
 [![asciicast](https://asciinema.org/a/241272.svg)](https://asciinema.org/a/241272?t=8)
 
+# FLOW-DIAGRAM
+
+![kubepaas-flow-diagram](https://github.com/urvil38/kubepaas-cli/blob/master/doc/images/kubepaas-flow.png)
+
