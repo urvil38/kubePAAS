@@ -54,6 +54,7 @@ func (l *logTailer) Poll(isLast bool) {
 			return
 		}
 	}
+
 	if isLast {
 		printLastLine()
 	}

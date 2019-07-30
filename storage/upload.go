@@ -16,7 +16,7 @@ import (
 //i.e. upload object's size should not be more than 20MB.
 const (
 	KB      = 1 << 10
-	MB      = 1 << 20
+	MB      = KB * KB
 	maxSize = 20 * MB
 )
 
@@ -41,11 +41,7 @@ func (u *uploadObject) UploadTarBallToGCS() error {
 	}
 
 	writer := client.Bucket(u.bucketName).Object(u.destination).NewWriter(context.Background())
-
 	reader, err := os.Open(u.source)
-	if err != nil {
-		return err
-	}
 	defer reader.Close()
 	if err != nil {
 		return err

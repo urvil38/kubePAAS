@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"github.com/urvil38/kubepaas/archive"
 	"github.com/urvil38/kubepaas/cloudbuild"
@@ -224,9 +224,9 @@ func generateTarBallFromKubernetes(currentVersion string) (path string,err error
 }
 
 func generateNewVersionNumber() (string, error) {
-	uuid, err := uuid.NewV4()
+	uuid,err := uuid.NewRandom()
 	if err != nil {
-		return "", err
+		return "",err
 	}
 	return uuid.String(), nil
 }
