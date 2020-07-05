@@ -11,11 +11,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"github.com/urvil38/kubepaas/archive"
+	"github.com/urvil38/kubepaas/banner"
 	"github.com/urvil38/kubepaas/cloudbuild"
 	"github.com/urvil38/kubepaas/config"
 	"github.com/urvil38/kubepaas/generator"
 	"github.com/urvil38/kubepaas/storage"
-	"github.com/urvil38/kubepaas/banner"
 )
 
 // deployCmd represents the deploy command
@@ -36,19 +36,25 @@ It require app.yaml file to be in your current directory where you running kubep
 			os.Exit(0)
 		}
 
-		canUpdateFlag,err := cmd.Flags().GetBool("update")
+		err := os.MkdirAll(config.KubeConfig.KubepaasRoot, 0777)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(0)
 		}
-		
+
+		canUpdateFlag, err := cmd.Flags().GetBool("update")
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(0)
+		}
+
 		if canUpdateFlag {
 			canUpdate = true
 		}
 
 		fmt.Println(banner.PrintDeployingMessage())
-		var appConfig config.AppConfig
-		appConfig, err = config.ParseAppConfigFile()
+
+		appConfig, err := config.ParseAppConfigFile()
 		if err != nil {
 			fmt.Printf("Error while deploying application: %v", err)
 			os.Exit(0)
@@ -63,20 +69,20 @@ It require app.yaml file to be in your current directory where you running kubep
 
 		var projectMetaData config.ProjectMetaData
 		if config.ProjectMetaDataFileExist() {
-			f, _ := os.Open(filepath.Join(PROJECT_ROOT, ".project.json"))
+			f, _ := os.Open(filepath.Join(config.KubeConfig.KubepaasRoot, ".project.json"))
 			defer f.Close()
 			b, _ := ioutil.ReadAll(f)
 			_ = json.Unmarshal(b, &projectMetaData)
 		}
 
 		if !config.ProjectMetaDataFileExist() {
-			_, err := os.Create(filepath.Join(PROJECT_ROOT, ".project.json"))
+			_, err := os.Create(filepath.Join(config.KubeConfig.KubepaasRoot, ".project.json"))
 			if err != nil {
 				fmt.Printf("Coun't create project.json file : %v\n", err)
 				os.Exit(0)
 			}
 
-			projectMetaData.ProjectName = appConfig.ProjectName
+			projectMetaData.ProjectName = appConfig.Metadata.Name
 			projectMetaData.Versions = append(projectMetaData.Versions, currentVersion)
 			if len(projectMetaData.Versions) == 0 {
 				projectMetaData.CurrentVersion = currentVersion
@@ -104,11 +110,10 @@ It require app.yaml file to be in your current directory where you running kubep
 				}
 			}
 		}
-		fmt.Println(banner.PrintProjectInfo(appConfig,projectMetaData))
-
+		fmt.Println(banner.PrintProjectInfo(*appConfig, projectMetaData))
 
 		fmt.Println(banner.PrintDockerfileMessage())
-		err = generator.GenerateDockerFile(appConfig)
+		err = generator.GenerateDockerFile(*appConfig)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(0)
@@ -116,7 +121,7 @@ It require app.yaml file to be in your current directory where you running kubep
 		fmt.Println(banner.SuccessDockerfileMessage())
 
 		fmt.Println(banner.PrintCloudBuildMessage())
-		err = generator.GenerateDockerCloudBuildFile(projectMetaData)
+		err = generator.GenerateDockerCloudBuildFile(projectMetaData, *appConfig)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(0)
@@ -135,19 +140,19 @@ It require app.yaml file to be in your current directory where you running kubep
 		if err != nil {
 			fmt.Printf("Unable to create tar folder :%v", err.Error())
 		}
-		err = uploadSourceCodeToGCS(tarFilePath,projectMetaData.ProjectName,currentVersion)
+		err = uploadSourceCodeToGCS(tarFilePath, projectMetaData.ProjectName, currentVersion)
 		if err != nil {
 			fmt.Printf("Error while Uploding File :%v\n", err.Error())
 		}
 
-		err = cloudbuild.CreateNewBuild("kubepaas","docker")
+		err = cloudbuild.CreateNewBuild("kubepaas-261611", "docker")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(0)
 		}
 
 		fmt.Println(banner.PrintKubernetesMessage())
-		err = generator.GenerateKubernetesConfig(appConfig,projectMetaData)
+		err = generator.GenerateKubernetesConfig(*appConfig, projectMetaData)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(0)
@@ -155,16 +160,16 @@ It require app.yaml file to be in your current directory where you running kubep
 		fmt.Println(banner.SuccessKubernetesMessage())
 
 		fmt.Println(banner.PrintUploadKubernetesMessage())
-		tarFilePath,err = generateTarBallFromKubernetes(currentVersion)
+		tarFilePath, err = generateTarBallFromKubernetes(currentVersion)
 		if err != nil {
-			fmt.Printf("Unable to create tar folder: %v",err)
+			fmt.Printf("Unable to create tar folder: %v", err)
 		}
-		err = uploadKubernetesConfigToGCS(tarFilePath,projectMetaData.ProjectName,currentVersion)
+		err = uploadKubernetesConfigToGCS(tarFilePath, projectMetaData.ProjectName, currentVersion)
 		if err != nil {
 			fmt.Printf("Error while Uploding File :%v\n", err.Error())
 		}
 
-		err = cloudbuild.CreateNewBuild("kubepaas","kubernetes")
+		err = cloudbuild.CreateNewBuild("kubepaas-261611", "kubernetes")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(0)
@@ -177,7 +182,7 @@ func writeToProjectMetaDataFile(projectMetaData interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filepath.Join(PROJECT_ROOT, ".project.json"), b, 600)
+	err = ioutil.WriteFile(filepath.Join(config.KubeConfig.KubepaasRoot, ".project.json"), b, 600)
 	if err != nil {
 		return err
 	}
@@ -185,53 +190,53 @@ func writeToProjectMetaDataFile(projectMetaData interface{}) error {
 }
 
 func uploadSourceCodeToGCS(source string, projectName string, currentVersion string) error {
-	bucketName := "staging-kubepaas-ml"
+	bucketName := "kubepaas-ml"
 	uploadObject := storage.NewUploadObject(source, projectName+"/"+projectName+"-"+currentVersion+".tgz", bucketName)
 	return uploadObject.UploadTarBallToGCS()
 }
 
 func uploadKubernetesConfigToGCS(source string, projectName string, currentVersion string) error {
-	bucketName := "staging-kubepaas-ml"
+	bucketName := "kubepaas-ml"
 	uploadObjectFormatString := `%s/kubernetes-%s-%s.tgz`
-	uploadObject := storage.NewUploadObject(source,fmt.Sprintf(uploadObjectFormatString,projectName,projectName,currentVersion),bucketName)
+	uploadObject := storage.NewUploadObject(source, fmt.Sprintf(uploadObjectFormatString, projectName, projectName, currentVersion), bucketName)
 	return uploadObject.UploadTarBallToGCS()
 }
 
 func generateTarBallFromSourceCode(currentVersion string) (path string, err error) {
 	temp := os.TempDir()
-	tempTarBallPath := filepath.Join(temp, filepath.Base(PROJECT_ROOT))
+	tempTarBallPath := filepath.Join(temp, filepath.Base(config.KubeConfig.ProjectRoot))
 
 	tempTarBallPath = tempTarBallPath + "-" + currentVersion
-	targetPath, err := archive.MakeTarBall(PROJECT_ROOT, tempTarBallPath)
+	targetPath, err := archive.MakeTarBall(config.KubeConfig.ProjectRoot, tempTarBallPath)
 	if err != nil {
 		return "", err
 	}
 	return targetPath, nil
 }
 
-func generateTarBallFromKubernetes(currentVersion string) (path string,err error) {
-	if _,err := os.Stat(filepath.Join(PROJECT_ROOT,"kubernetes","kubernetes.yaml")) ; os.IsNotExist(err) {
-		return "",err
+func generateTarBallFromKubernetes(currentVersion string) (path string, err error) {
+	if _, err := os.Stat(filepath.Join(config.KubeConfig.KubepaasRoot, "kubernetes", "kubernetes.yaml")); os.IsNotExist(err) {
+		return "", err
 	}
 	temp := os.TempDir()
-	tempTarBallPath := filepath.Join(temp, filepath.Base(PROJECT_ROOT))
+	tempTarBallPath := filepath.Join(temp, filepath.Base(config.KubeConfig.ProjectRoot))
 	tempTarBallPath = tempTarBallPath + "-" + "kubernetes" + "-" + currentVersion
-	targetPath, err := archive.MakeTarBall(filepath.Join(PROJECT_ROOT,"kubernetes"),tempTarBallPath)
+	targetPath, err := archive.MakeTarBall(filepath.Join(config.KubeConfig.KubepaasRoot, "kubernetes"), tempTarBallPath)
 	if err != nil {
-		return "",err
+		return "", err
 	}
-	return targetPath,nil
+	return targetPath, nil
 }
 
 func generateNewVersionNumber() (string, error) {
-	uuid,err := uuid.NewRandom()
+	uuid, err := uuid.NewRandom()
 	if err != nil {
-		return "",err
+		return "", err
 	}
 	return uuid.String(), nil
 }
 
 func init() {
 	rootCmd.AddCommand(deployCmd)
-	deployCmd.Flags().Bool("update",false,"specify that kubepaas will generate new tarBall with newly generated version number")
+	deployCmd.Flags().Bool("update", false, "specify that kubepaas will generate new tarBall with newly generated version number")
 }

@@ -4,12 +4,13 @@ import (
 	"os"
 	"time"
 
+	"github.com/urvil38/kubepaas/schema/latest"
+
 	"github.com/fatih/color"
 	"github.com/urvil38/kubepaas/config"
 )
 
-const deployMessage = 
-`
+const deployMessage = `
 ═════════════════════════════════════════════════════════════════════════════════ 
 ████████████████               Deploying Application             ████████████████
 ═════════════════════════════════════════════════════════════════════════════════
@@ -119,15 +120,15 @@ func SuccessUpdateKubernetesMessage() string {
 	return color.HiGreenString(" Successfully Updated kubernetes.yaml ✔︎")
 }
 
-func PrintProjectInfo(config config.AppConfig,projectMetadata config.ProjectMetaData) string {
-	wd,_:= os.Getwd()
+func PrintProjectInfo(config latest.KubepaasConfig, projectMetadata config.ProjectMetaData) string {
+	wd, _ := os.Getwd()
 	return color.HiYellowString(
 		projectInfo,
-		config.ProjectName,
+		config.Metadata.Name,
 		projectMetadata.CurrentVersion,
-		config.Runtime,
+		config.Deploy.Runtime,
 		wd,
-		"https://"+config.ProjectName+".kubepaas.ml",
+		"https://"+config.Metadata.Name+".kubepaas.ml",
 		time.Now().Format("2006-01-02 3:4:5 PM"))
 }
 

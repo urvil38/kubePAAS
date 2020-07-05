@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/urvil38/kubepaas/config"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/urvil38/kubepaas/config"
 
 	"github.com/spf13/cobra"
 	"github.com/urvil38/kubepaas/util"
@@ -27,9 +28,8 @@ const (
 )
 
 var (
-	ConfigValue  config.Config
-	Login        bool
-	PROJECT_ROOT string
+	ConfigValue config.AuthConfig
+	Login       bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -60,7 +60,6 @@ func printBanner() {
 }
 
 func init() {
-	PROJECT_ROOT, _ = os.Getwd()
 
 	err := os.MkdirAll(util.GetConfigFolderPath(), 0777)
 	if err != nil {

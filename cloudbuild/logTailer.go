@@ -12,14 +12,14 @@ import (
 type logTailer struct {
 	logBucket string
 	logObject string
-	cursor int
+	cursor    int
 }
 
 func NewLogTailer(logBucket, logObject string) *logTailer {
 	return &logTailer{
 		logBucket: logBucket,
 		logObject: logObject,
-		cursor: 0,
+		cursor:    0,
 	}
 }
 
@@ -49,7 +49,7 @@ func (l *logTailer) Poll(isLast bool) {
 		}
 		l.cursor += len(b)
 		fmt.Println(strings.TrimRight(string(b), "\n"))
-		if isLast && len(b) > 0{
+		if isLast && len(b) > 0 {
 			printLastLine()
 			return
 		}

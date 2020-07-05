@@ -1,5 +1,5 @@
 package userservice
 
 const (
-	userserviceEndpoint = `http://localhost:8080/v1/%s`
+	userserviceEndpoint = `https://auth.kubepaas.ml/v1/%s`
 )

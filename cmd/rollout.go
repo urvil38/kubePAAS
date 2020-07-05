@@ -1,12 +1,13 @@
 package cmd
 
 import (
-	"github.com/fatih/color"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/fatih/color"
 
 	"github.com/urvil38/kubepaas/banner"
 	"github.com/urvil38/kubepaas/cloudbuild"
@@ -30,26 +31,25 @@ var rolloutCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		var appConfig config.AppConfig
 		appConfig, err := config.ParseAppConfigFile()
 		if err != nil {
 			fmt.Printf("Error while deploying application: %v", err)
 			os.Exit(0)
 		}
 
-		forward,err := cmd.Flags().GetBool("forward")
+		forward, err := cmd.Flags().GetBool("forward")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(0)
 		}
 
-		backward,err := cmd.Flags().GetBool("backward")
+		backward, err := cmd.Flags().GetBool("backward")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(0)
 		}
 
-		history,err := cmd.Flags().GetBool("history")
+		history, err := cmd.Flags().GetBool("history")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(0)
@@ -57,7 +57,7 @@ var rolloutCmd = &cobra.Command{
 
 		var projectMetaData config.ProjectMetaData
 		if config.ProjectMetaDataFileExist() {
-			f, _ := os.Open(filepath.Join(PROJECT_ROOT, ".project.json"))
+			f, _ := os.Open(filepath.Join(config.KubeConfig.KubepaasRoot, ".project.json"))
 			defer f.Close()
 			b, _ := ioutil.ReadAll(f)
 			_ = json.Unmarshal(b, &projectMetaData)
@@ -94,7 +94,7 @@ var rolloutCmd = &cobra.Command{
 			updatedIndex = currentIndex - 1
 			if updatedIndex >= 0 {
 				projectMetaData.CurrentVersion = projectMetaData.Versions[updatedIndex]
-			}else{
+			} else {
 				fmt.Println("Unable to rollback backward as there are no version available.")
 				printVersionHistory(projectMetaData)
 				os.Exit(0)
@@ -103,9 +103,9 @@ var rolloutCmd = &cobra.Command{
 
 		if forward {
 			updatedIndex = currentIndex + 1
-			if updatedIndex <= len(projectMetaData.Versions) - 1 {
+			if updatedIndex <= len(projectMetaData.Versions)-1 {
 				projectMetaData.CurrentVersion = projectMetaData.Versions[updatedIndex]
-			}else{
+			} else {
 				fmt.Println("Unable to rollback forward as there are no version available.")
 				printVersionHistory(projectMetaData)
 				os.Exit(0)
@@ -127,14 +127,14 @@ var rolloutCmd = &cobra.Command{
 		}
 		fmt.Println(banner.SuccessUpdateKubernetesCloudbuildMessage())
 
-		err = generator.GenerateKubernetesConfig(appConfig, projectMetaData)
+		err = generator.GenerateKubernetesConfig(*appConfig, projectMetaData)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(0)
 		}
 		fmt.Println(banner.SuccessUpdateKubernetesMessage())
 
-		err = cloudbuild.CreateNewBuild("kubepaas", "kubernetes")
+		err = cloudbuild.CreateNewBuild("kubepaas-261611", "kubernetes")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(0)
@@ -149,31 +149,31 @@ const (
 func printVersionHistory(projectMetaData config.ProjectMetaData) {
 	fmt.Println("          VERSION HISTORY        ")
 	fmt.Println("          ═══════════════        ")
-	fmt.Printf("\t\t%s\n",connector)
-	for i,version := range projectMetaData.Versions {
-		if i == len(projectMetaData.Versions) - 1 {
+	fmt.Printf("\t\t%s\n", connector)
+	for i, version := range projectMetaData.Versions {
+		if i == len(projectMetaData.Versions)-1 {
 			if version == projectMetaData.CurrentVersion {
-				fmt.Printf("%d ⟹   %s\n",i+1,green(version))
-			}else{
-				fmt.Printf("%d ⟹   %s\n",i+1,version)
+				fmt.Printf("%d ⟹   %s\n", i+1, green(version))
+			} else {
+				fmt.Printf("%d ⟹   %s\n", i+1, version)
 			}
-		}else{
+		} else {
 			if version == projectMetaData.CurrentVersion {
-				fmt.Printf("%d ⟹   %s\n\t\t%s\n",i+1,green(version),connector)
-			}else{
-				fmt.Printf("%d ⟹   %s\n\t\t%s\n",i+1,version,connector)
+				fmt.Printf("%d ⟹   %s\n\t\t%s\n", i+1, green(version), connector)
+			} else {
+				fmt.Printf("%d ⟹   %s\n\t\t%s\n", i+1, version, connector)
 			}
 		}
-	} 
+	}
 }
 
 func green(s string) string {
-	return color.HiGreenString(s+"\t%s","⬅︎  CURRENT-VERSION")
+	return color.HiGreenString(s+"\t%s", "⬅︎  CURRENT-VERSION")
 }
 
 func init() {
 	rootCmd.AddCommand(rolloutCmd)
-	rolloutCmd.Flags().BoolP("forward","f",false,"Increment Current version")
-	rolloutCmd.Flags().BoolP("backward","b",false,"Decrement Current Version")
-	rolloutCmd.Flags().BoolP("history","",false,"Shows version history")
+	rolloutCmd.Flags().BoolP("forward", "f", false, "Increment Current version")
+	rolloutCmd.Flags().BoolP("backward", "b", false, "Decrement Current Version")
+	rolloutCmd.Flags().BoolP("history", "", false, "Shows version history")
 }

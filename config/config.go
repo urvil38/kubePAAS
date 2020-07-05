@@ -2,16 +2,25 @@ package config
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
+	"github.com/urvil38/kubepaas/schema/latest"
 	"github.com/urvil38/kubepaas/util"
+
+	"sigs.k8s.io/yaml"
 )
 
-func CreateConfigFile(c Config) error {
+var (
+	KubeConfig KubepaasConfig
+	KAppConfig latest.KubepaasConfig
+)
+
+const kubepaasAppConfigFile = `kubepaas.yml`
+
+func CreateConfigFile(c AuthConfig) error {
 	buffer := new(bytes.Buffer)
 
 	buffer.WriteString(c.Token + "\n" + c.Email + "\n" + c.ID + "\n" + c.Name)
@@ -32,8 +41,8 @@ func CheckAppConfigFileExists() bool {
 		fmt.Printf("Couldn't Find current working directory beacause of : %v\n", err)
 	}
 
-	if _, err := os.Stat(filepath.Join(wd, "app.json")); err != nil {
-		fmt.Println("\x1b[31m✗ No app.json file exist. Make sure you have app.json file in current project ℹ\x1b[0m")
+	if _, err := os.Stat(filepath.Join(wd, kubepaasAppConfigFile)); err != nil {
+		fmt.Println("\x1b[31m✗ No kubepaas.yml file exist. Make sure you have kubepaas.yml file in current project ℹ\x1b[0m")
 		return false
 	}
 
@@ -47,31 +56,32 @@ func getAppConfigPath() (string, error) {
 	}
 
 	if CheckAppConfigFileExists() {
-		return filepath.Join(wd, "app.json"), nil
+		return filepath.Join(wd, kubepaasAppConfigFile), nil
 	}
-	return "", fmt.Errorf("Coun't find app.json file")
+	return "", fmt.Errorf("Coun't find kubepaas.yml file")
 }
 
-func ParseAppConfigFile() (AppConfig, error) {
-	var appConfig AppConfig
+func ParseAppConfigFile() (*latest.KubepaasConfig, error) {
+
 	path, err := getAppConfigPath()
 	if err != nil {
-		return appConfig, err
+		return nil, err
 	}
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
-		return appConfig, err
+		return nil, err
 	}
-	err = json.Unmarshal(b, &appConfig)
+
+	err = yaml.Unmarshal(b, &KAppConfig)
 	if err != nil {
-		return appConfig, err
+		return nil, err
 	}
-	return appConfig, nil
+
+	return &KAppConfig, nil
 }
 
 func ProjectMetaDataFileExist() bool {
-	wd,_ := os.Getwd()
-	if _, err := os.Stat(filepath.Join(wd, ".project.json")); err != nil {
+	if _, err := os.Stat(filepath.Join(KubeConfig.KubepaasRoot, ".project.json")); err != nil {
 		return false
 	}
 	return true

@@ -15,8 +15,23 @@
 package main
 
 import (
+	"log"
+	"os"
+	"path/filepath"
+
 	"github.com/urvil38/kubepaas/cmd"
+	"github.com/urvil38/kubepaas/config"
 )
+
+func init() {
+	projectRoot, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	config.KubeConfig.ProjectRoot = projectRoot
+
+	config.KubeConfig.KubepaasRoot = filepath.Join(projectRoot, "kubepaas")
+}
 
 func main() {
 	cmd.Execute()

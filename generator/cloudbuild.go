@@ -6,24 +6,29 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"time"
+
+	"github.com/urvil38/kubepaas/schema/latest"
 
 	"github.com/urvil38/kubepaas/config"
 	"github.com/urvil38/kubepaas/http/client"
 )
 
-func GenerateDockerCloudBuildFile(projectMetaData config.ProjectMetaData) error {
+func GenerateDockerCloudBuildFile(projectMetaData config.ProjectMetaData, appMetaData latest.KubepaasConfig) error {
 	timeout := 10 * time.Second
 	client := client.NewHTTPClient(&timeout)
 
 	type cloudBuild struct {
 		ProjectName    string `json:"project_name"`
 		CurrentVersion string `json:"current_version"`
+		DockerFilePath string `json:"dockerfilePath"`
 	}
 
 	cb := cloudBuild{
 		ProjectName:    projectMetaData.ProjectName,
 		CurrentVersion: projectMetaData.CurrentVersion,
+		DockerFilePath: appMetaData.Deploy.DockerfilePath,
 	}
 
 	b, err := json.Marshal(cb)
@@ -50,7 +55,7 @@ func GenerateDockerCloudBuildFile(projectMetaData config.ProjectMetaData) error 
 		if err != nil {
 			return fmt.Errorf("Coun't read body of response , %v", err)
 		}
-		err = ioutil.WriteFile("docker-cloudbuild.json", b, 0644)
+		err = ioutil.WriteFile(filepath.Join(config.KubeConfig.KubepaasRoot, "docker-cloudbuild.json"), b, 0644)
 		if err != nil {
 			return fmt.Errorf("Unable to create docker-cloudbuild.json file: , %v", err)
 		}
@@ -98,7 +103,7 @@ func GenerateKubernetesCloudBuildFile(projectMetaData config.ProjectMetaData) er
 		if err != nil {
 			return fmt.Errorf("Coun't read body of response , %v", err)
 		}
-		err = ioutil.WriteFile("kubernetes-cloudbuild.json", b, 0644)
+		err = ioutil.WriteFile(filepath.Join(config.KubeConfig.KubepaasRoot, "kubernetes-cloudbuild.json"), b, 0644)
 		if err != nil {
 			return fmt.Errorf("Unable to create kubernetes-cloudbuild.json file: , %v", err)
 		}

@@ -6,13 +6,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"time"
+
+	"github.com/urvil38/kubepaas/schema/latest"
 
 	"github.com/urvil38/kubepaas/config"
 	"github.com/urvil38/kubepaas/http/client"
 )
 
-func GenerateDockerFile(appConfig config.AppConfig) error {
+func GenerateDockerFile(appConfig latest.KubepaasConfig) error {
 	timeout := 10 * time.Second
 	client := client.NewHTTPClient(&timeout)
 
@@ -40,7 +43,7 @@ func GenerateDockerFile(appConfig config.AppConfig) error {
 		if err != nil {
 			return fmt.Errorf("Coun't read body of response , %v", err)
 		}
-		err = ioutil.WriteFile("Dockerfile", b, 0644)
+		err = ioutil.WriteFile(filepath.Join(config.KubeConfig.ProjectRoot, "Dockerfile"), b, 0644)
 		if err != nil {
 			return fmt.Errorf("Unable to create Dockerfile , %v", err)
 		}

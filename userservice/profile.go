@@ -12,7 +12,7 @@ import (
 	"github.com/urvil38/kubepaas/http/client"
 )
 
-func getUserProfile(conf config.Config) (userConf config.UserConfig, err error) {
+func getUserProfile(conf config.AuthConfig) (userConf config.UserConfig, err error) {
 	var userConfig config.UserConfig
 
 	timeout := 15 * time.Second

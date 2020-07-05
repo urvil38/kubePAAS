@@ -45,11 +45,7 @@ func MakeTarBall(source, target string) (path string, err error) {
 			return err
 		}
 
-		if fileInfo.Name()[0] == '.' {
-			return nil
-		}
-
-		if fileInfo.IsDir() && fileInfo.Name()[0] == '.' || fileInfo.IsDir() && fileInfo.Name() == "node_modules" {
+		if fileInfo.IsDir() && fileInfo.Name() == ".git" || fileInfo.IsDir() && fileInfo.Name() == "node_modules" || fileInfo.IsDir() && fileInfo.Name() == "kubepaas" {
 			return filepath.SkipDir
 		}
 

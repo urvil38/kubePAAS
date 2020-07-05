@@ -13,7 +13,7 @@ var email = survey.Question{
 		Help:    "Please provide your email for registration",
 	},
 	Validate: func(val interface{}) error {
-		paaswdReg := regexp.MustCompile(`^\w+@(gmail|yahoo)\.[a-zA-Z]{2,3}$`)
+		paaswdReg := regexp.MustCompile(`^\w+@\w+\.[a-zA-Z]{2,3}$`)
 		if str, ok := val.(string); !ok || !paaswdReg.Match([]byte(str)) {
 			return errors.New("Please enter valid email")
 		}

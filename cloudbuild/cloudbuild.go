@@ -5,17 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/urvil38/kubepaas/config"
 	"google.golang.org/api/cloudbuild/v1"
 )
 
 const (
-	MAX_RETRIES    = 60 * 60
-	RETRY_INTERVAL = 1 * time.Second
+	maxRetries    = 60 * 60
+	retryInterval = 1 * time.Second
 )
 
 type builder struct {
@@ -26,11 +26,10 @@ type builder struct {
 
 var errTimeout = errors.New("Operation %s timed out. This operation may still be underway")
 
-func newBuilder(projectName,buildType string) (builder, error) {
-	var projectRoot, _ = os.Getwd()
+func newBuilder(projectName, buildType string) (builder, error) {
 	var build cloudbuild.Build
 	if buildType == "docker" {
-		cb, err := ioutil.ReadFile(filepath.Join(projectRoot, "docker-cloudbuild.json"))
+		cb, err := ioutil.ReadFile(filepath.Join(config.KubeConfig.KubepaasRoot, "docker-cloudbuild.json"))
 		if err != nil {
 			return builder{}, err
 		}
@@ -41,7 +40,7 @@ func newBuilder(projectName,buildType string) (builder, error) {
 	}
 
 	if buildType == "kubernetes" {
-		cb, err := ioutil.ReadFile(filepath.Join(projectRoot, "kubernetes-cloudbuild.json"))
+		cb, err := ioutil.ReadFile(filepath.Join(config.KubeConfig.KubepaasRoot, "kubernetes-cloudbuild.json"))
 		if err != nil {
 			return builder{}, err
 		}
@@ -59,8 +58,8 @@ func newBuilder(projectName,buildType string) (builder, error) {
 	}, nil
 }
 
-func CreateNewBuild(projectName string,buildType string) error {
-	builder, err := newBuilder(projectName,buildType)
+func CreateNewBuild(projectName string, buildType string) error {
+	builder, err := newBuilder(projectName, buildType)
 	if err != nil {
 		return err
 	}
@@ -160,7 +159,7 @@ func pollUntilDone(op *cloudbuild.Operation, callback func(bool)) (cloudbuild.Op
 	cloudService, _ := getCloudBuildClient()
 	operationGetCall := cloudService.Operations.Get(op.Name)
 
-	for i := 0; i < MAX_RETRIES; i++ {
+	for i := 0; i < maxRetries; i++ {
 		operation, err := operationGetCall.Do()
 		if err != nil {
 			return cloudbuild.Operation{}, err
@@ -170,7 +169,7 @@ func pollUntilDone(op *cloudbuild.Operation, callback func(bool)) (cloudbuild.Op
 			return *operation, nil
 		}
 		//fmt.Printf("Operation %v not complete. Waiting %v\n",operation.Name,RETRY_INTERVAL.String())
-		time.Sleep(RETRY_INTERVAL)
+		time.Sleep(retryInterval)
 		if callback != nil {
 			callback(false)
 		}

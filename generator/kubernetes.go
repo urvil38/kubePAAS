@@ -1,28 +1,30 @@
 package generator
 
 import (
-	"path/filepath"
-	"os"
-	"io/ioutil"
-	"net/http"
 	"bytes"
-	"time"
 	"encoding/json"
 	"fmt"
-	"github.com/urvil38/kubepaas/http/client"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/urvil38/kubepaas/config"
+	"github.com/urvil38/kubepaas/http/client"
+	"github.com/urvil38/kubepaas/schema/latest"
 )
 
-func GenerateKubernetesConfig(appConfig config.AppConfig,projectMetadata config.ProjectMetaData) error{
-
-	kubernetes := config.Kubernetes{
-		ProjectName: appConfig.ProjectName,
-		CurrentVersion: projectMetadata.CurrentVersion,
-		Port: appConfig.Port,
-	}
+func GenerateKubernetesConfig(appConfig latest.KubepaasConfig, projectMetadata config.ProjectMetaData) error {
 
 	timeout := 10 * time.Second
 	client := client.NewHTTPClient(&timeout)
+
+	kubernetes := config.Kubernetes{
+		ProjectName:    projectMetadata.ProjectName,
+		CurrentVersion: projectMetadata.CurrentVersion,
+		Spec:           appConfig,
+	}
 
 	b, err := json.Marshal(kubernetes)
 	if err != nil {
@@ -48,12 +50,12 @@ func GenerateKubernetesConfig(appConfig config.AppConfig,projectMetadata config.
 		if err != nil {
 			return fmt.Errorf("Coun't read body of response , %v", err)
 		}
-		projectRoot, _ := os.Getwd()
-		err = os.MkdirAll(filepath.Join(projectRoot,"kubernetes"),0777)
+
+		err = os.MkdirAll(filepath.Join(config.KubeConfig.KubepaasRoot, "kubernetes"), 0777)
 		if err != nil {
 			return err
 		}
-		err = ioutil.WriteFile(filepath.Join(projectRoot,"kubernetes","kubernetes.yaml"), b, 0777)
+		err = ioutil.WriteFile(filepath.Join(config.KubeConfig.KubepaasRoot, "kubernetes", "kubernetes.yaml"), b, 0777)
 		if err != nil {
 			return fmt.Errorf("Unable to create kubernetes.yaml , %v", err)
 		}

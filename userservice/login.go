@@ -52,7 +52,7 @@ func Login(auth questions.AuthCredential) error {
 		if err != nil {
 			return fmt.Errorf("Cound't get user configuration details: %v", err.Error())
 		}
-		var conf config.Config
+		var conf config.AuthConfig
 		conf.Token, conf.Email = token, auth.Email
 		userConf, err := getUserProfile(conf)
 		if err != nil {
