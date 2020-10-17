@@ -73,7 +73,7 @@ func (u *uploadObject) UploadTarBallToGCS() error {
 	if err != nil {
 		s.Stop()
 		_ = removeSourceFile(u.source)
-		return fmt.Errorf(" \x1b[31mPlease check your internet connection ℹ\x1b[0m")
+		return err
 	}
 	s.Stop()
 	fmt.Println(color.HiGreenString("Successfully uploaded %s file ✔︎", filepath.Base(u.source)))

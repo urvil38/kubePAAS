@@ -50,7 +50,11 @@ func newBuilder(projectName, buildType string) (builder, error) {
 		}
 	}
 
-	cloudbuildService, _ := getCloudBuildClient()
+	cloudbuildService, err := getCloudBuildClient()
+	if err != nil {
+		return builder{}, err
+	}
+
 	return builder{
 		ProjectName:       projectName,
 		Build:             build,

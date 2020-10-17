@@ -1,4 +1,4 @@
-package userservice
+package authservice
 
 import (
 	"bytes"
@@ -25,7 +25,7 @@ func Login(auth questions.AuthCredential) error {
 
 	s := spinner.New("Loging you in")
 	s.Start()
-	res, err := client.Post(fmt.Sprintf(userserviceEndpoint, "login"), "application/json", bytes.NewReader(b))
+	res, err := client.Post(fmt.Sprintf(authserviceEndpoint, "login"), "application/json", bytes.NewReader(b))
 	if err != nil {
 		s.Stop()
 		return fmt.Errorf("Unable to Login.Connection Timeout ⏱")

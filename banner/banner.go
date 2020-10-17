@@ -18,13 +18,13 @@ const deployMessage = `
 
 const dockerfileMessage = `
 ═══════════════════════════════════════════════════════
-██████████████ Generating Dockerfile 🐳  ███████████████
+██████████████ Generating Dockerfile 🐳  ██████████████
 ═══════════════════════════════════════════════════════
 `
 
 const cloudbuildfileMessage = `
 ═══════════════════════════════════════════════════════
-██████████  Generating CloudBuild Config ☁️ 🛠  █████████
+████████  Generating CloudBuild Config ☁️ 🛠  █████████
 ═══════════════════════════════════════════════════════
 `
 
@@ -35,9 +35,9 @@ const kubernetesMessage = `
 `
 
 const updatekubernetesMessage = `
-═══════════════════════════════════════════════════════
+═════════════════════════════════════════════════════
 ███████████ Updating Kubernetes Config ❅  ███████████
-═══════════════════════════════════════════════════════
+═════════════════════════════════════════════════════
 `
 
 const uploadSourceCode = `
@@ -124,12 +124,12 @@ func PrintProjectInfo(config latest.KubepaasConfig, projectMetadata config.Proje
 	wd, _ := os.Getwd()
 	return color.HiYellowString(
 		projectInfo,
-		config.Metadata.Name,
-		projectMetadata.CurrentVersion,
-		config.Deploy.Runtime,
-		wd,
-		"https://"+config.Metadata.Name+".kubepaas.ml",
-		time.Now().Format("2006-01-02 3:4:5 PM"))
+		formatText(config.Metadata.Name),
+		formatText(projectMetadata.CurrentVersion),
+		formatText(config.Deploy.Runtime),
+		formatText(wd),
+		formatText("https://"+config.Metadata.Name+".kubepaas.ml"),
+		formatText(time.Now().Format("2006-01-02 3:4:5 PM")))
 }
 
 func StartCloudBuildLog() string {
@@ -146,4 +146,11 @@ func PrintUploadSourceCodeMessage() string {
 
 func PrintUploadKubernetesMessage() string {
 	return color.HiWhiteString(uploadKubernetes)
+}
+
+func formatText(text string) string {
+	if len(text) > 45 {
+		text = text[:45] + "..."
+	}
+	return text
 }

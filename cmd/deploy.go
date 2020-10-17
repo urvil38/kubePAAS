@@ -68,6 +68,12 @@ It require app.yaml file to be in your current directory where you running kubep
 		}
 
 		var projectMetaData config.ProjectMetaData
+
+		err = generator.KmanagerConf(&projectMetaData)
+		if err != nil {
+			fmt.Printf("Couldn't Get kubepaas cluster data: %v \n", err)
+			os.Exit(1)
+		}
 		if config.ProjectMetaDataFileExist() {
 			f, _ := os.Open(filepath.Join(config.KubeConfig.KubepaasRoot, ".project.json"))
 			defer f.Close()
@@ -79,7 +85,7 @@ It require app.yaml file to be in your current directory where you running kubep
 			_, err := os.Create(filepath.Join(config.KubeConfig.KubepaasRoot, ".project.json"))
 			if err != nil {
 				fmt.Printf("Coun't create project.json file : %v\n", err)
-				os.Exit(0)
+				os.Exit(1)
 			}
 
 			projectMetaData.ProjectName = appConfig.Metadata.Name
@@ -92,7 +98,7 @@ It require app.yaml file to be in your current directory where you running kubep
 			err = writeToProjectMetaDataFile(projectMetaData)
 			if err != nil {
 				fmt.Println(err)
-				os.Exit(0)
+				os.Exit(1)
 			}
 		} else {
 			if canUpdate {
@@ -106,7 +112,7 @@ It require app.yaml file to be in your current directory where you running kubep
 				err := writeToProjectMetaDataFile(projectMetaData)
 				if err != nil {
 					fmt.Println(err)
-					os.Exit(0)
+					os.Exit(1)
 				}
 			}
 		}
@@ -116,7 +122,7 @@ It require app.yaml file to be in your current directory where you running kubep
 		err = generator.GenerateDockerFile(*appConfig)
 		if err != nil {
 			fmt.Print(err)
-			os.Exit(0)
+			os.Exit(1)
 		}
 		fmt.Println(banner.SuccessDockerfileMessage())
 
@@ -124,14 +130,14 @@ It require app.yaml file to be in your current directory where you running kubep
 		err = generator.GenerateDockerCloudBuildFile(projectMetaData, *appConfig)
 		if err != nil {
 			fmt.Print(err)
-			os.Exit(0)
+			os.Exit(1)
 		}
 		fmt.Println(banner.SuccessDockerCloudbuildMessage())
 
 		err = generator.GenerateKubernetesCloudBuildFile(projectMetaData)
 		if err != nil {
 			fmt.Print(err)
-			os.Exit(0)
+			os.Exit(1)
 		}
 		fmt.Println(banner.SuccessKubernetesCloudbuildMessage())
 
@@ -140,22 +146,22 @@ It require app.yaml file to be in your current directory where you running kubep
 		if err != nil {
 			fmt.Printf("Unable to create tar folder :%v", err.Error())
 		}
-		err = uploadSourceCodeToGCS(tarFilePath, projectMetaData.ProjectName, currentVersion)
+		err = uploadSourceCodeToGCS(projectMetaData.SourceCodeBucket, tarFilePath, projectMetaData.ProjectName, currentVersion)
 		if err != nil {
 			fmt.Printf("Error while Uploding File :%v\n", err.Error())
 		}
 
-		err = cloudbuild.CreateNewBuild("kubepaas-261611", "docker")
+		err = cloudbuild.CreateNewBuild(projectMetaData.GCPProject, "docker")
 		if err != nil {
 			fmt.Println(err)
-			os.Exit(0)
+			os.Exit(1)
 		}
 
 		fmt.Println(banner.PrintKubernetesMessage())
 		err = generator.GenerateKubernetesConfig(*appConfig, projectMetaData)
 		if err != nil {
 			fmt.Print(err)
-			os.Exit(0)
+			os.Exit(1)
 		}
 		fmt.Println(banner.SuccessKubernetesMessage())
 
@@ -164,15 +170,15 @@ It require app.yaml file to be in your current directory where you running kubep
 		if err != nil {
 			fmt.Printf("Unable to create tar folder: %v", err)
 		}
-		err = uploadKubernetesConfigToGCS(tarFilePath, projectMetaData.ProjectName, currentVersion)
+		err = uploadKubernetesConfigToGCS(projectMetaData.SourceCodeBucket, tarFilePath, projectMetaData.ProjectName, currentVersion)
 		if err != nil {
 			fmt.Printf("Error while Uploding File :%v\n", err.Error())
 		}
 
-		err = cloudbuild.CreateNewBuild("kubepaas-261611", "kubernetes")
+		err = cloudbuild.CreateNewBuild(projectMetaData.GCPProject, "kubernetes")
 		if err != nil {
 			fmt.Println(err)
-			os.Exit(0)
+			os.Exit(1)
 		}
 	},
 }
@@ -189,16 +195,14 @@ func writeToProjectMetaDataFile(projectMetaData interface{}) error {
 	return nil
 }
 
-func uploadSourceCodeToGCS(source string, projectName string, currentVersion string) error {
-	bucketName := "kubepaas-ml"
-	uploadObject := storage.NewUploadObject(source, projectName+"/"+projectName+"-"+currentVersion+".tgz", bucketName)
+func uploadSourceCodeToGCS(bucket string, source string, projectName string, currentVersion string) error {
+	uploadObject := storage.NewUploadObject(source, projectName+"/"+projectName+"-"+currentVersion+".tgz", bucket)
 	return uploadObject.UploadTarBallToGCS()
 }
 
-func uploadKubernetesConfigToGCS(source string, projectName string, currentVersion string) error {
-	bucketName := "kubepaas-ml"
+func uploadKubernetesConfigToGCS(bucket string, source string, projectName string, currentVersion string) error {
 	uploadObjectFormatString := `%s/kubernetes-%s-%s.tgz`
-	uploadObject := storage.NewUploadObject(source, fmt.Sprintf(uploadObjectFormatString, projectName, projectName, currentVersion), bucketName)
+	uploadObject := storage.NewUploadObject(source, fmt.Sprintf(uploadObjectFormatString, projectName, projectName, currentVersion), bucket)
 	return uploadObject.UploadTarBallToGCS()
 }
 

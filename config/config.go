@@ -18,7 +18,7 @@ var (
 	KAppConfig latest.KubepaasConfig
 )
 
-const kubepaasAppConfigFile = `kubepaas.yml`
+const kubepaasAppConfigFile = `app.yml`
 
 func CreateConfigFile(c AuthConfig) error {
 	buffer := new(bytes.Buffer)
@@ -42,7 +42,7 @@ func CheckAppConfigFileExists() bool {
 	}
 
 	if _, err := os.Stat(filepath.Join(wd, kubepaasAppConfigFile)); err != nil {
-		fmt.Println("\x1b[31m✗ No kubepaas.yml file exist. Make sure you have kubepaas.yml file in current project ℹ\x1b[0m")
+		fmt.Println("\x1b[31m✗ No app.yml file exist. Make sure you have app.yml file in current project ℹ\x1b[0m")
 		return false
 	}
 
@@ -58,7 +58,7 @@ func getAppConfigPath() (string, error) {
 	if CheckAppConfigFileExists() {
 		return filepath.Join(wd, kubepaasAppConfigFile), nil
 	}
-	return "", fmt.Errorf("Coun't find kubepaas.yml file")
+	return "", fmt.Errorf("Coun't find app.yml file")
 }
 
 func ParseAppConfigFile() (*latest.KubepaasConfig, error) {

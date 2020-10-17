@@ -75,7 +75,7 @@ type DeployConfig struct {
 
 	Resources *ResourceRequirements `json:"resources,omitempty"`
 
-	Envs []EnvVar `ymal:"env, omitempty"`
+	Envs []EnvVar `json:"env,omitempty"`
 
 	ExternalLogging bool `json:"logging,omitempty"`
 
@@ -143,8 +143,8 @@ type ResourceRequirement struct {
 }
 
 type EnvVar struct {
-	Name  string `json:"name",omitempty`
-	Value string `json:"value",omitempty`
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
 }
 
 type MetricsConfig struct {

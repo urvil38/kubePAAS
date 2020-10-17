@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/urvil38/kubepaas/authservice"
 	"github.com/urvil38/kubepaas/questions"
-	"github.com/urvil38/kubepaas/userservice"
 	"github.com/urvil38/kubepaas/util"
 	"gopkg.in/AlecAivazis/survey.v1"
 )
@@ -49,8 +49,8 @@ var loginCmd = &cobra.Command{
 			}
 		}
 
-		//contact with userservice in order to login
-		err := userservice.Login(auth)
+		//contact with authservice in order to login
+		err := authservice.Login(auth)
 		if err != nil {
 			fmt.Println(err)
 		}

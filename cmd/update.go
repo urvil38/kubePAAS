@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/urvil38/kubepaas/authservice"
 	"github.com/urvil38/kubepaas/config"
 	"github.com/urvil38/kubepaas/questions"
-	"github.com/urvil38/kubepaas/userservice"
 	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/spf13/cobra"
@@ -47,7 +47,7 @@ func changePassword() error {
 
 	authToken, email := ConfigValue.AuthToken.Token, ConfigValue.Email
 
-	err = userservice.ChangePassword(pass, authToken, email)
+	err = authservice.ChangePassword(pass, authToken, email)
 	if err != nil {
 		return err
 	}

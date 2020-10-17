@@ -1,4 +1,4 @@
-package userservice
+package authservice
 
 import (
 	"encoding/json"
@@ -18,7 +18,7 @@ func getUserProfile(conf config.AuthConfig) (userConf config.UserConfig, err err
 	timeout := 15 * time.Second
 	client := client.NewHTTPClient(&timeout)
 
-	req, err := http.NewRequest("GET", fmt.Sprintf(userserviceEndpoint, "user"+"/"+conf.Email), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf(authserviceEndpoint, "user"+"/"+conf.Email), nil)
 	req.Header.Add("x-access-token", conf.AuthToken.Token)
 	res, err := client.Do(req)
 	if err != nil {

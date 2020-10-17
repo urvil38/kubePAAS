@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/urvil38/kubepaas/authservice"
 	"github.com/urvil38/kubepaas/http/client"
 	"github.com/urvil38/kubepaas/questions"
-	"github.com/urvil38/kubepaas/userservice"
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
@@ -44,7 +44,7 @@ func promptForRegisterInit(client *http.Client, signupInfo *questions.UserInfo) 
 		return err
 	}
 
-	err := userservice.RegistrationInit(client, *signupInfo)
+	err := authservice.RegistrationInit(client, *signupInfo)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func promptForRegisterFinish(client *http.Client, signupInfo *questions.UserInfo
 	if err := survey.Ask(questions.RegisterUserFinish, signupInfo); err != nil {
 		return err
 	}
-	err := userservice.RegistrationFinish(client, *signupInfo)
+	err := authservice.RegistrationFinish(client, *signupInfo)
 	if err != nil {
 		return err
 	}

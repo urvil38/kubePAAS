@@ -144,8 +144,8 @@ type ResourceRequirement struct {
 }
 
 type EnvVar struct {
-	Name  string `json:"name",omitempty`
-	Value string `json:"value",omitempty`
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
 }
 
 type MetricsConfig struct {

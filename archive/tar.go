@@ -8,13 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
-)
-
-const (
-	isDir = 1 << iota
-	isSymLink
-	isHardLink
 )
 
 //Tarit tar the folder given by source path and place it at target path
@@ -44,7 +37,6 @@ func MakeTarBall(source, target string) (path string, err error) {
 		if err != nil {
 			return err
 		}
-
 		if fileInfo.IsDir() && fileInfo.Name() == ".git" || fileInfo.IsDir() && fileInfo.Name() == "node_modules" || fileInfo.IsDir() && fileInfo.Name() == "kubepaas" {
 			return filepath.SkipDir
 		}
@@ -54,46 +46,9 @@ func MakeTarBall(source, target string) (path string, err error) {
 			return err
 		}
 
-		stat, ok := fileInfo.Sys().(*syscall.Stat_t)
-		if !ok {
-			return fmt.Errorf("cannot convert stat value to syscall.Stat_t")
-		}
-
-		//headerType for store type of header
-		//   001          010            100     <- byteOrder
-		//	isDir	   isSymLink     isHardLink
-		//    |            |              |
-		// Directory  SymbolicLink     HardLink
-		var headerType byte
-
-		// Check if file is Directory.
-		if fileInfo.IsDir() {
-			headerType |= isDir
-		}
-
-		// True if the file is a symlink.
-		if fileInfo.Mode()&os.ModeSymlink != 0 {
-			headerType |= isSymLink
-		}
-
-		// Check if file have hardlink.
-		nlink := uint32(stat.Nlink)
-		if nlink > 1 {
-			headerType |= isHardLink
-		}
-
 		header.Name = strings.TrimPrefix(strings.Replace(file, source, "", -1), string(filepath.Separator))
-
-		//setting header's Typeflag according to headerType
-		if headerType&isSymLink == isSymLink {
-			header.Typeflag = tar.TypeSymlink
-		}
-		if headerType&isHardLink == isHardLink {
-			header.Typeflag = tar.TypeLink
-		}
-		if headerType&isDir == isDir {
+		if header.Typeflag == tar.TypeDir {
 			header.Name += "/"
-			header.Typeflag = tar.TypeDir
 		}
 
 		//writing header information to tar-gzip writer
@@ -103,7 +58,7 @@ func MakeTarBall(source, target string) (path string, err error) {
 
 		//if file have symlink or is directory we just return
 		//because we can't open that file
-		if headerType&isSymLink == isSymLink || headerType&isDir == isDir {
+		if header.Typeflag == tar.TypeDir || header.Typeflag == tar.TypeSymlink {
 			return nil
 		}
 

@@ -17,9 +17,12 @@ type AppConfig struct {
 }
 
 type ProjectMetaData struct {
-	ProjectName    string   `json:"project_name"`
-	CurrentVersion string   `json:"current_version"`
-	Versions       []string `json:"versions"`
+	ProjectName         string   `json:"project_name"`
+	CurrentVersion      string   `json:"current_version"`
+	Versions            []string `json:"versions"`
+	GCPProject          string   `json:"gcp_project"`
+	SourceCodeBucket    string   `json:"source_bucket"`
+	CloudBuildLogBucket string   `json:"cloudbuild_bucket"`
 }
 
 type Kubernetes struct {
