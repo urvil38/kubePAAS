@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/urvil38/spinner"
 	"net/http"
 
+	"github.com/urvil38/spinner"
+
+	"github.com/urvil38/kubepaas/config"
 	"github.com/urvil38/kubepaas/questions"
 )
 
@@ -16,7 +18,7 @@ func RegistrationInit(client *http.Client, signupInfo questions.UserInfo) error 
 		return fmt.Errorf("Couldn't marshal registration details: %v", err.Error())
 	}
 
-	res, err := client.Post(fmt.Sprintf(authserviceEndpoint, "user"), "application/json", bytes.NewReader(b))
+	res, err := client.Post(config.CLIConf.AuthEndpoint+"/user", "application/json", bytes.NewReader(b))
 	if err != nil {
 		return fmt.Errorf("Unable to Signup.Check Internet Connection")
 	}
@@ -49,7 +51,7 @@ func RegistrationFinish(client *http.Client, signupInfo questions.UserInfo) erro
 
 	s := spinner.New("Registering You")
 	s.Start()
-	res, err := client.Post(fmt.Sprintf(authserviceEndpoint, "user"), "application/json", bytes.NewReader(b))
+	res, err := client.Post(config.CLIConf.AuthEndpoint+"/user", "application/json", bytes.NewReader(b))
 	if err != nil {
 		s.Stop()
 		return fmt.Errorf("Unable to Signup.Check Internet Connection")

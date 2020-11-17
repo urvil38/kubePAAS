@@ -15,15 +15,17 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/urvil38/kubepaas/cmd"
 	"github.com/urvil38/kubepaas/config"
+	"github.com/urvil38/kubepaas/util"
 )
 
-func init() {
+func main() {
 	projectRoot, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
@@ -31,8 +33,15 @@ func init() {
 	config.KubeConfig.ProjectRoot = projectRoot
 
 	config.KubeConfig.KubepaasRoot = filepath.Join(projectRoot, "kubepaas")
-}
 
-func main() {
+	config.CLIConf = config.NewCLIConfig()
+
+	if util.ConfigFileExists() {
+		err := config.CLIConf.Read()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
 	cmd.Execute()
 }

@@ -128,7 +128,7 @@ func PrintProjectInfo(config latest.KubepaasConfig, projectMetadata config.Proje
 		formatText(projectMetadata.CurrentVersion),
 		formatText(config.Deploy.Runtime),
 		formatText(wd),
-		formatText("https://"+config.Metadata.Name+".kubepaas.ml"),
+		formatText("https://"+config.Metadata.Name+"."+projectMetadata.Domain),
 		formatText(time.Now().Format("2006-01-02 3:4:5 PM")))
 }
 

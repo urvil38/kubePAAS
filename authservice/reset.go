@@ -21,7 +21,7 @@ func ChangePassword(pass config.ChangePassword, authToken, email string) error {
 		return fmt.Errorf("Unable to marshal password Struct: %v", err)
 	}
 
-	req, err := http.NewRequest("PUT", fmt.Sprintf(authserviceEndpoint, "user/"+email+"/password"), bytes.NewReader(b))
+	req, err := http.NewRequest("PUT", config.CLIConf.AuthEndpoint+"/user/"+email+"/password", bytes.NewReader(b))
 	if err != nil {
 		return err
 	}

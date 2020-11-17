@@ -31,7 +31,7 @@ func GenerateKubernetesConfig(appConfig latest.KubepaasConfig, projectMetadata c
 		return fmt.Errorf("Couldn't marshal registration details: %v", err.Error())
 	}
 
-	res, err := client.Post(fmt.Sprintf(generatorEndPoint, "kubernetes"), "application/json", bytes.NewReader(b))
+	res, err := client.Post(config.CLIConf.GeneratorEndpoint+"/kubernetes", "application/json", bytes.NewReader(b))
 	if err != nil {
 		return fmt.Errorf("Unable to Signup.Check Internet Connection")
 	}

@@ -16,13 +16,22 @@ type AppConfig struct {
 	StaticDir   string `json:"static_dir"`
 }
 
+type secret string
+
 type ProjectMetaData struct {
 	ProjectName         string   `json:"project_name"`
 	CurrentVersion      string   `json:"current_version"`
 	Versions            []string `json:"versions"`
 	GCPProject          string   `json:"gcp_project"`
+	Domain              string   `json:"domain_name"`
 	SourceCodeBucket    string   `json:"source_bucket"`
 	CloudBuildLogBucket string   `json:"cloudbuild_bucket"`
+	CloudBuildSecret    secret   `json:"cloudbuild_secret,omitempty"`
+	CloudStorageSecret  secret   `json:"cloudstorage_secret,omitempty"`
+}
+
+func (secret) MarshalJSON() ([]byte, error) {
+	return []byte(`""`), nil
 }
 
 type Kubernetes struct {

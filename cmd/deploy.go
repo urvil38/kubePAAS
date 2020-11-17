@@ -27,10 +27,10 @@ It require app.yaml file to be in your current directory where you running kubep
 	Run: func(cmd *cobra.Command, args []string) {
 		var canUpdate bool
 
-		if !Login {
-			fmt.Println("Login or Signup in order to deploy your app to kubepaas")
-			return
-		}
+		// if !Login {
+		// 	fmt.Println("Login or Signup in order to deploy your app to kubepaas")
+		// 	return
+		// }
 		exists := config.CheckAppConfigFileExists()
 		if !exists {
 			os.Exit(0)

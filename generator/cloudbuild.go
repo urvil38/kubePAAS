@@ -36,7 +36,7 @@ func GenerateDockerCloudBuildFile(projectMetaData config.ProjectMetaData, appMet
 		return fmt.Errorf("Couldn't marshal registration details: %v", err.Error())
 	}
 
-	res, err := client.Post(fmt.Sprintf(generatorEndPoint, "cloudbuild/t/docker"), "application/json", bytes.NewReader(b))
+	res, err := client.Post(config.CLIConf.GeneratorEndpoint+"/cloudbuild/t/docker", "application/json", bytes.NewReader(b))
 	if err != nil {
 		return fmt.Errorf("Unable to Signup.Check Internet Connection")
 	}
@@ -84,7 +84,7 @@ func GenerateKubernetesCloudBuildFile(projectMetaData config.ProjectMetaData) er
 		return fmt.Errorf("Couldn't marshal registration details: %v", err.Error())
 	}
 
-	res, err := client.Post(fmt.Sprintf(generatorEndPoint, "cloudbuild/t/kubernetes"), "application/json", bytes.NewReader(b))
+	res, err := client.Post(config.CLIConf.GeneratorEndpoint+"/cloudbuild/t/kubernetes", "application/json", bytes.NewReader(b))
 	if err != nil {
 		return fmt.Errorf("Unable to Signup.Check Internet Connection")
 	}

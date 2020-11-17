@@ -16,15 +16,16 @@ import (
 var (
 	KubeConfig KubepaasConfig
 	KAppConfig latest.KubepaasConfig
+	CLIConf  *CLIConfig
 )
 
 const kubepaasAppConfigFile = `app.yml`
 
-func CreateConfigFile(c AuthConfig) error {
+func CreateAuthConfigFile(c AuthConfig) error {
 	buffer := new(bytes.Buffer)
 
 	buffer.WriteString(c.Token + "\n" + c.Email + "\n" + c.ID + "\n" + c.Name)
-	confFileName, err := util.GetConfigFilePath()
+	confFileName, err := util.GetAuthConfigFilePath()
 	if err != nil {
 		return err
 	}

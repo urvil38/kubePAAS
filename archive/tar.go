@@ -70,7 +70,7 @@ func MakeTarBall(source, target string) (path string, err error) {
 		}
 
 		//Copy content of file to tar-gzip writer
-		//This step do tar and gzip of given file f
+		//This step perfoms tar and gzip of given file f
 		if _, err := io.Copy(tgzw, f); err != nil {
 			return err
 		}

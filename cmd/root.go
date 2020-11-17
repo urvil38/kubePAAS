@@ -73,8 +73,8 @@ func init() {
 		Login = true
 	}
 
-	if util.ConfigFileExists() {
-		confFileName, _ := util.GetConfigFilePath()
+	if util.AuthConfigFileExists() {
+		confFileName, _ := util.GetAuthConfigFilePath()
 
 		b, err := ioutil.ReadFile(confFileName)
 		if err != nil {

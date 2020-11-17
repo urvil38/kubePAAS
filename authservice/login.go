@@ -25,7 +25,7 @@ func Login(auth questions.AuthCredential) error {
 
 	s := spinner.New("Loging you in")
 	s.Start()
-	res, err := client.Post(fmt.Sprintf(authserviceEndpoint, "login"), "application/json", bytes.NewReader(b))
+	res, err := client.Post(config.CLIConf.AuthEndpoint+"/login", "application/json", bytes.NewReader(b))
 	if err != nil {
 		s.Stop()
 		return fmt.Errorf("Unable to Login.Connection Timeout ⏱")
@@ -60,7 +60,7 @@ func Login(auth questions.AuthCredential) error {
 			return fmt.Errorf("Cound't get profile of user: %v", err.Error())
 		}
 		conf.ID, conf.Name = userConf.ID, userConf.Name
-		err = config.CreateConfigFile(conf)
+		err = config.CreateAuthConfigFile(conf)
 		if err != nil {
 			s.Stop()
 			return fmt.Errorf("Cound't write user configuration details: %v", err.Error())

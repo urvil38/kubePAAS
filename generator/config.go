@@ -2,24 +2,21 @@ package generator
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"time"
 
 	"github.com/urvil38/kubepaas/config"
+	"github.com/urvil38/kubepaas/util"
 
 	"github.com/urvil38/kubepaas/http/client"
-)
-
-const (
-	generatorEndPoint = "https://generator.kubepaas.ml/%s"
 )
 
 func KmanagerConf(metadata *config.ProjectMetaData) error {
 	timeout := 10 * time.Second
 	client := client.NewHTTPClient(&timeout)
 
-	res, err := client.Get(fmt.Sprintf(generatorEndPoint, "kubepaas/config"))
+	res, err := client.Get(config.CLIConf.GeneratorEndpoint + "/kubepaas/config")
 	if err != nil {
 		return err
 	}
@@ -34,5 +31,22 @@ func KmanagerConf(metadata *config.ProjectMetaData) error {
 	if err != nil {
 		return err
 	}
+
+	if metadata.CloudBuildSecret != "" {
+		cloudBuildSecretFilePath := filepath.Join(util.GetConfigFolderPath(), "kubepaas-cloudbuild.json")
+		err = ioutil.WriteFile(cloudBuildSecretFilePath, []byte(metadata.CloudBuildSecret), 0600)
+		if err != nil {
+			return err
+		}
+	}
+
+	if metadata.CloudStorageSecret != "" {
+		cloudStorageSecretFilePath := filepath.Join(util.GetConfigFolderPath(), "kubepaas-storage.json")
+		err = ioutil.WriteFile(cloudStorageSecretFilePath, []byte(metadata.CloudStorageSecret), 0600)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
