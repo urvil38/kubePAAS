@@ -16,7 +16,7 @@ import (
 var (
 	KubeConfig KubepaasConfig
 	KAppConfig latest.KubepaasConfig
-	CLIConf  *CLIConfig
+	CLIConf    *CLIConfig
 )
 
 const kubepaasAppConfigFile = `app.yml`
@@ -36,18 +36,17 @@ func CreateAuthConfigFile(c AuthConfig) error {
 	return nil
 }
 
-func CheckAppConfigFileExists() bool {
+func CheckAppConfigFileExists() (bool, error) {
 	wd, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("Couldn't Find current working directory beacause of : %v\n", err)
+		return false, fmt.Errorf("Couldn't Find current working directory beacause of : %v\n", err)
 	}
 
 	if _, err := os.Stat(filepath.Join(wd, kubepaasAppConfigFile)); err != nil {
-		fmt.Println("\x1b[31m✗ No app.yml file exist. Make sure you have app.yml file in current project ℹ\x1b[0m")
-		return false
+		return false, fmt.Errorf("\x1b[31m✗ No app.yml file exist. Make sure you have app.yml file in current project ℹ\x1b[0m")
 	}
 
-	return true
+	return true, nil
 }
 
 func getAppConfigPath() (string, error) {
@@ -56,10 +55,11 @@ func getAppConfigPath() (string, error) {
 		fmt.Printf("Couldn't Find current working directory beacause of : %v\n", err)
 	}
 
-	if CheckAppConfigFileExists() {
+	exists, err := CheckAppConfigFileExists()
+	if exists {
 		return filepath.Join(wd, kubepaasAppConfigFile), nil
 	}
-	return "", fmt.Errorf("Coun't find app.yml file")
+	return "", err
 }
 
 func ParseAppConfigFile() (*latest.KubepaasConfig, error) {

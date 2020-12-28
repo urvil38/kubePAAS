@@ -3,10 +3,12 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/urvil38/kubepaas/config"
+	"github.com/urvil38/kubepaas/util"
 )
 
 const (
@@ -70,6 +72,25 @@ var unsetConfigCmd = &cobra.Command{
 	},
 }
 
+var listConfigCmd = &cobra.Command{
+	Use:   "list",
+	Short: "list a Kubepaas CLI config",
+	Run: func(cmd *cobra.Command, args []string) {
+		fp, err := util.GetConfigFilePath()
+		if err != nil {
+			cmd.PrintErrln(err)
+			os.Exit(1)
+		}
+
+		b, err := ioutil.ReadFile(fp)
+		if errors.Is(err, os.ErrNotExist) {
+			cmd.PrintErrln(".config.json file not found!")
+		}
+
+		fmt.Println(string(b))
+	},
+}
+
 func validate(args []string, argCount int, usageErr string) error {
 	if len(args) != argCount {
 		return errors.New(usageErr)
@@ -82,4 +103,5 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(setConfigCmd)
 	configCmd.AddCommand(unsetConfigCmd)
+	configCmd.AddCommand(listConfigCmd)
 }

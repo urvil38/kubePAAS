@@ -26,8 +26,10 @@ var rolloutCmd = &cobra.Command{
 			fmt.Println("Login or Signup in order to deploy your app to kubepaas")
 			return
 		}
-		exists := config.CheckAppConfigFileExists() && config.ProjectMetaDataFileExist()
-		if !exists {
+		kAppConfigFileExists, err := config.CheckAppConfigFileExists()
+		metadataFileExists := config.ProjectMetaDataFileExist()
+		if !(kAppConfigFileExists || metadataFileExists) {
+			fmt.Println(err)
 			os.Exit(0)
 		}
 

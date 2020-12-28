@@ -31,12 +31,13 @@ It require app.yaml file to be in your current directory where you running kubep
 		// 	fmt.Println("Login or Signup in order to deploy your app to kubepaas")
 		// 	return
 		// }
-		exists := config.CheckAppConfigFileExists()
+		exists, err := config.CheckAppConfigFileExists()
 		if !exists {
+			fmt.Println(err)
 			os.Exit(0)
 		}
 
-		err := os.MkdirAll(config.KubeConfig.KubepaasRoot, 0777)
+		err = os.MkdirAll(config.KubeConfig.KubepaasRoot, 0777)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(0)

@@ -34,6 +34,14 @@ func main() {
 
 	config.KubeConfig.KubepaasRoot = filepath.Join(projectRoot, "kubepaas")
 
+	_, err = config.CheckAppConfigFileExists()
+	if err == nil {
+		kAppConfig, err := config.ParseAppConfigFile()
+		if err == nil {
+			config.KAppConfig = *kAppConfig
+		}
+	}
+
 	config.CLIConf = config.NewCLIConfig()
 
 	if util.ConfigFileExists() {
